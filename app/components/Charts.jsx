@@ -29,7 +29,7 @@ const getData = async () => {
   return {
     account,
     monthsData: monthsData.map((res) => res.data[0]),
-    monthData: monthsData[currentMonth],
+    monthData: monthsData[currentMonth].data[0],
   };
 };
 

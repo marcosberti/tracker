@@ -10,7 +10,7 @@ import { HelpCircle } from "lucide-react";
 
 export default function Overview({ account, income, spent }) {
   return (
-    <div className="flex w-[250px] flex-col gap-2 rounded-lg border-[1px] p-4">
+    <div className="flex min-w-[250px] flex-col justify-between gap-2 rounded-lg border-[1px] p-4">
       <div className="flex items-center gap-2">
         <span className="font-semibold">Overview</span>
         <TooltipProvider>
@@ -22,8 +22,10 @@ export default function Overview({ account, income, spent }) {
           </Tooltip>
         </TooltipProvider>
       </div>
-      <Separator />
-      <div>
+      <div className="w-full">
+        <Separator />
+      </div>
+      <div className="">
         <div className="flex justify-between text-sm">
           <span>Income</span>
           <span>{formatCurrency(income || 0, account.currencies.code)}</span>
@@ -33,7 +35,9 @@ export default function Overview({ account, income, spent }) {
           <span>{formatCurrency(spent || 0, account.currencies.code)}</span>
         </div>
       </div>
-      <Separator />
+      <div className="w-full">
+        <Separator />
+      </div>
       <div className="flex justify-between text-sm">
         <span>Balance</span>
         <span>

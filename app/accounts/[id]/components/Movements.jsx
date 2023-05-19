@@ -1,10 +1,15 @@
 "use client";
 import {
-  ColumnDef,
   flexRender,
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   Table,
   TableBody,
@@ -18,7 +23,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Edit2, MoreHorizontal, Trash2 } from "lucide-react";
@@ -33,11 +37,21 @@ const columns = [
     header: "",
     cell: ({ row }) => {
       const {
-        categories: { color },
+        categories: { name, color },
       } = row.original;
       return (
         <div className="flex justify-center">
-          <Icon icon={row.getValue("icon")} className={`text-${color}-700`} />
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <Icon
+                  icon={row.getValue("icon")}
+                  className={`text-${color}-700`}
+                />
+              </TooltipTrigger>
+              <TooltipContent className="capitalize">{name}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       );
     },

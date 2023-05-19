@@ -103,3 +103,11 @@ export const authRoute = (handler: Function) => {
     handler(req, res);
   };
 };
+
+export function timeout(ms: number = 5000) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve("go");
+    }, ms);
+  });
+}

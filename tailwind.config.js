@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 
-const colors = ["blue", "purple", "indigo", "green"];
+const colors = ["blue", "purple", "indigo", "green", "red"];
 const rules = [
   "text-color-700",
   "bg-color-300/[.4]",

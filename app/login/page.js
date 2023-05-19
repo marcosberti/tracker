@@ -1,43 +1,45 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/Input"
-import { Button } from "@/components/ui/Button"
-import { Loader2 } from "lucide-react"
-import { createBrowserClient} from '@/lib/supabase-browser'
+import { useState } from "react";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
+import { Loader2 } from "lucide-react";
+import { createBrowserClient } from "@/lib/supabase-browser";
 
 export default function Login() {
   const supabase = createBrowserClient();
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const  handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
-    const email = formData.get('email')
-    const password = formData.get('password')
+    const email = formData.get("email");
+    const password = formData.get("password");
 
     if (email && password) {
       setIsLoading(true);
-      const {error} = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
-      })
-      
-      console.log('>>>error', error);
+      });
+
+      console.log(">>>error", error);
     }
-  }
+  };
 
   return (
-    <div className="flex flex-col items-center justify-center h-full">
+    <div className="flex h-full flex-col items-center justify-center">
       <div className="mb-8 text-center">
-        <h1 className="font-medium text-xl">tracker</h1>
-        <small className="text-xs font-thin">donttheyalllookthesameinside</small>
+        <h1 className="text-xl font-medium">tracker</h1>
+        <small className="text-xs font-thin">
+          donttheyalllookthesameinside
+        </small>
       </div>
 
       <form
-        className="w-full px-8 flex flex-col gap-2"
+        className="flex w-full flex-col gap-2 px-8"
         noValidate
         onSubmit={handleSubmit}
       >
@@ -51,11 +53,11 @@ export default function Login() {
           <Input id="password" name="password" type="password" />
         </div>
 
-        <Button className="mt-4" disabled={isLoading} type='submit'>
+        <Button className="mt-4" disabled={isLoading} type="submit">
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Log in
         </Button>
       </form>
     </div>
-  )
+  );
 }

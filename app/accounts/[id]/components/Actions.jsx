@@ -1,27 +1,11 @@
-import { createServerClient } from "@/lib/supabase-server";
 import MonthPicker from "./MonthPicker";
-import MovementSheet from "./MovementSheet";
+import CreateOptions from "./CreateOptions";
 
-async function getData() {
-  const supabase = createServerClient();
-
-  const [{ data: currencies }, { data: categories }, { data: types }] =
-    await Promise.all([
-      supabase.from("currencies").select("id,name,code"),
-      supabase.from("categories").select("id,name"),
-      supabase.from("movement_types").select("id,type"),
-    ]);
-
-  return { currencies, categories, types };
-}
-
-export default async function Actions({ account }) {
-  const { currencies, categories } = await getData();
-
+export default function Actions({ account, currencies, categories }) {
   return (
     <div className="flex justify-end gap-2">
       <MonthPicker />
-      <MovementSheet
+      <CreateOptions
         account={account}
         currencies={currencies}
         categories={categories}

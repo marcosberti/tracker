@@ -27,9 +27,9 @@ export default function MonthChart({ account, monthData }) {
   };
 
   const hasMovements =
-    monthData.income === null &&
-    monthData.spent === null &&
-    account.balance === null;
+    monthData.income !== null &&
+    monthData.spent !== null &&
+    account.balance !== null;
 
   return (
     <div className="flex min-w-[300px] basis-1/4 flex-col items-center">
