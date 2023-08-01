@@ -35,11 +35,7 @@ export default function DropdownItemDialog({
 					<DialogDescription>{description}</DialogDescription>
 				</DialogHeader>
 				<DialogFooter>
-					<Button
-						className="bg-green-600 hover:bg-green-600/90"
-						disabled={isPending}
-						onClick={onConfirm}
-					>
+					<Button disabled={isPending} onClick={onConfirm}>
 						{isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
 						Confirm
 					</Button>

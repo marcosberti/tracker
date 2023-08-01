@@ -70,10 +70,7 @@ export default function AccountSheet({ isOpen, account, onOpenChange }) {
 					</div>
 
 					<div className="flex justify-end">
-						<Button
-							className="w-24 bg-green-600 hover:bg-green-600/90"
-							type="submit"
-						>
+						<Button className="w-24" type="submit">
 							Save
 						</Button>
 					</div>

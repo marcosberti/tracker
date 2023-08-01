@@ -1,4 +1,9 @@
-import { Controller, useForm } from 'react-hook-form';
+import {
+	Sheet,
+	SheetContent,
+	SheetHeader,
+	SheetTitle,
+} from '@/components/ui/sheet';
 import {
 	Select,
 	SelectTrigger,
@@ -12,7 +17,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
+import { Check, X, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Controller, useForm } from 'react-hook-form';
+import useMutation from '@/hooks/useMutation';
+import FieldWithError from '@/app/components/FieldWithError';
 
 function getDefaultValues(account, movement) {
 	return {
@@ -25,7 +35,7 @@ function getDefaultValues(account, movement) {
 	};
 }
 
-export default function MovementForm({
+function MovementForm({
 	account,
 	movement,
 	categories,
@@ -45,7 +55,7 @@ export default function MovementForm({
 			<fieldset disabled={isPending}>
 				<input hidden name="accountId" {...register('accountId')} />
 				<div className="mt-2 flex gap-2">
-					<div className="relative mb-5 basis-1/2">
+					<FieldWithError error={errors.title?.message}>
 						<Label>
 							Title
 							<Input
@@ -55,13 +65,8 @@ export default function MovementForm({
 								{...register('title', { required: 'Title is required' })}
 							/>
 						</Label>
-						{errors.title ? (
-							<small className="absolute -bottom-5 text-xs text-red-600">
-								{errors.title.message}
-							</small>
-						) : null}
-					</div>
-					<div className="relative mb-5 basis-1/2">
+					</FieldWithError>
+					<FieldWithError error={errors.categoryId?.message}>
 						<Label htmlFor="category">
 							Category
 							<Controller
@@ -118,33 +123,23 @@ export default function MovementForm({
 								)}
 							/>
 						</Label>
-						{errors.categoryId ? (
-							<small className="absolute -bottom-5 text-xs text-red-600">
-								{errors.categoryId.message}
-							</small>
-						) : null}
-					</div>
+					</FieldWithError>
 				</div>
 				<div className="mt-2 flex gap-2">
-					<div className=" relative mb-5 basis-1/2">
+					<FieldWithError error={errors.amount?.message}>
 						<Label htmlFor="amount">Amount</Label>
 						<Input
 							id="amount"
 							name="amount"
 							type="number"
-							className={errors.title ? 'border-red-600' : ''}
+							className={errors.amount ? 'border-red-600' : ''}
 							{...register('amount', {
 								required: 'Amount is required',
 								valueAsNumber: true,
 							})}
 						/>
-						{errors.amount ? (
-							<small className="absolute -bottom-5 text-xs text-red-600">
-								{errors.amount.message}
-							</small>
-						) : null}
-					</div>
-					<div className="relative mb-5 basis-1/2">
+					</FieldWithError>
+					<FieldWithError error={errors.currencyId?.message}>
 						<Label htmlFor="currency">Currency</Label>
 						<Controller
 							name="currencyId"
@@ -178,27 +173,99 @@ export default function MovementForm({
 								</Select>
 							)}
 						/>
-						{errors.currencyId ? (
-							<small className="absolute -bottom-5 text-xs text-red-600">
-								{errors.currencyId.message}
-							</small>
-						) : null}
-					</div>
+					</FieldWithError>
 				</div>
 				<Label htmlFor="description">
 					Description
 					<Textarea className="resize-none" {...register('description')} />
 				</Label>
 				<div className="mt-4 flex justify-end">
-					<Button
-						className="bg-green-600 hover:bg-green-600/90"
-						disabled={isPending}
-					>
+					<Button disabled={isPending}>
 						{isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
 						Save
 					</Button>
 				</div>
 			</fieldset>
 		</form>
+	);
+}
+
+export default function MovementSheet({
+	isOpen,
+	account,
+	movement,
+	currencies,
+	categories,
+	onClose,
+}) {
+	const router = useRouter();
+	const { toast } = useToast();
+	const { mutate: postMutate, isPending: isPostPending } =
+		useMutation('movements');
+	const { mutate: patchMutate, isPending: isPatchPending } = useMutation(
+		'movements',
+		'PATCH',
+	);
+
+	const isPending = isPostPending || isPatchPending;
+
+	const handleClose = () => {
+		if (isPending) return;
+		onClose();
+	};
+
+	const onSubmit = values => {
+		const mutate = movement ? patchMutate : postMutate;
+		const data = movement ? { ...values, movementId: movement.id } : values;
+		mutate({
+			data,
+			onSuccess: () => {
+				toast({
+					title: (
+						<div className="border-se flex items-center gap-2">
+							<Check className="h-4 w-4" />
+							Movement {movement ? 'updated' : 'created'} successfully!
+						</div>
+					),
+					variant: 'success',
+				});
+				onClose();
+				router.refresh();
+			},
+			onError: e => {
+				toast({
+					title: (
+						<div className="border-se flex items-center gap-2">
+							<X className="h-4 w-4" />
+							Oops, there's been an error!
+						</div>
+					),
+					variant: 'error',
+				});
+			},
+		});
+	};
+
+	return (
+		<Sheet open={isOpen} onOpenChange={handleClose}>
+			<SheetContent>
+				<SheetHeader>
+					<SheetTitle>
+						what are you paying?{' '}
+						{movement ? (
+							<small className="text-sm font-light">(editing)</small>
+						) : null}
+					</SheetTitle>
+				</SheetHeader>
+				<MovementForm
+					account={account}
+					movement={movement}
+					currencies={currencies}
+					categories={categories}
+					isPending={isPending}
+					onSubmit={onSubmit}
+				/>
+			</SheetContent>
+		</Sheet>
 	);
 }

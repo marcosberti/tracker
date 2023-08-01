@@ -5,16 +5,16 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import MovementSheet from './MovementSheet';
+import MovementSheet from '../Movements/Sheet';
 import { Button } from '@/components/ui/button';
-import { DollarSign } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useState } from 'react';
 
 const SHEETS = {
 	movement: 'movement',
 };
 
-export default function PayOptions({ account, currencies, categories }) {
+export default function CreateExpenses({ account, currencies, categories }) {
 	const [openSheet, setOpenSheet] = useState();
 
 	const handleNewMovement = () => {
@@ -29,20 +29,17 @@ export default function PayOptions({ account, currencies, categories }) {
 		<>
 			<DropdownMenu>
 				<DropdownMenuTrigger asChild>
-					<Button className=" bg-green-600 hover:bg-green-600/90">
+					<Button variant="secondary">
 						<span className="sr-only">Open menu</span>
-						<DollarSign className="h-4 w-4 text-white " />
+						<Plus className="h-4 w-4  " />
 					</Button>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent align="end">
-					<DropdownMenuItem onSelect={handleNewMovement}>
-						<span className="ml-2">New movement</span>
+					<DropdownMenuItem>
+						<span className="ml-2">New installment expense</span>
 					</DropdownMenuItem>
 					<DropdownMenuItem>
-						<span className="ml-2">Pay installment expense</span>
-					</DropdownMenuItem>
-					<DropdownMenuItem>
-						<span className="ml-2">Pay scheduled expense</span>
+						<span className="ml-2">New scheduled expense</span>
 					</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenu>

@@ -21,12 +21,16 @@ export default async function RootLayout({ children }) {
 
 	return (
 		<html lang="en" className="h-full">
-			<body className={`${inter.className} h-full text-gray-700`}>
+			<body
+				className={`${inter.className} h-full overflow-hidden text-gray-700`}
+			>
 				<SupabaseProvider session={session}>
 					<SupabaseListener serverAccessToken={session?.access_token} />
 					<div className="flex h-full">
 						{session ? <Navbar /> : null}
-						<main className={`w-full ${session ? 'p-8' : ''}`}>{children}</main>
+						<main className={`w-full ${session ? 'p-8' : ''} overflow-y-auto`}>
+							{children}
+						</main>
 					</div>
 				</SupabaseProvider>
 				<Toaster />

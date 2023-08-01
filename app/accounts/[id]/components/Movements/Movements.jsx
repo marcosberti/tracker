@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
-import MovementSheet from './MovementSheet';
-import MovementsList from './MovementsList';
+import Sheet from './Sheet';
+import List from './List';
 import useMutation from '@/hooks/useMutation';
 import { useToast } from '@/components/ui/use-toast';
 import { Check, X } from 'lucide-react';
@@ -17,16 +17,12 @@ const INITIAL_STATE = {
 	movement: null,
 };
 
-export default function Movements({
-	movements,
-	account,
-	currencies,
-	categories,
-}) {
+export default function Movements({ data, account, currencies, categories }) {
 	const router = useRouter();
 	const { toast } = useToast();
-	const { mutate, isPending } = useMutation('movements', 'PUT');
+	const { mutate, isPending } = useMutation('movements', 'DELETE');
 	const [state, setState] = useState(INITIAL_STATE);
+
 	const handleEdit = movement => {
 		setState({ modal: MODALS.edit, movement });
 	};
@@ -52,7 +48,6 @@ export default function Movements({
 				router.refresh();
 			},
 			onError: e => {
-				console.log('>>>', e);
 				toast({
 					title: (
 						<div className="border-se flex items-center gap-2">
@@ -70,7 +65,7 @@ export default function Movements({
 		setState(INITIAL_STATE);
 	};
 
-	const data = movements.map(m => ({
+	const _data = data.map(m => ({
 		...m,
 		isPending,
 		handleEdit,
@@ -80,10 +75,10 @@ export default function Movements({
 	return (
 		<>
 			<div className="rounded-md border">
-				<MovementsList data={data} />
+				<List data={_data} />
 			</div>
 			{state.modal === MODALS.edit ? (
-				<MovementSheet
+				<Sheet
 					isOpen
 					account={account}
 					movement={state.movement}

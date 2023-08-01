@@ -6,21 +6,19 @@ import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { createBrowserClient } from '@/lib/supabase-browser';
 import { useForm } from 'react-hook-form';
-import { useRouter } from 'next/navigation';
 import FieldWithError from '../components/FieldWithError';
 
 const STATUS = {
 	idle: 'idle',
 	loading: 'loading',
 	error: 'error',
+	sent: 'sent',
 };
 
-export default function Login() {
+export default function Reset() {
 	const supabase = createBrowserClient();
-	const router = useRouter();
 	const {
 		register,
-		resetField,
 		handleSubmit,
 		formState: { errors },
 	} = useForm();
@@ -28,31 +26,18 @@ export default function Login() {
 		status: STATUS.idle,
 	});
 
-	const handleForgot = () => {
-		router.push('/reset');
-	};
-
 	const onSubmit = async values => {
 		setState({ status: STATUS.loading });
-		const { email, password } = values;
+		const { email } = values;
 
-		const { error } = await supabase.auth.signInWithPassword({
-			email,
-			password,
+		await supabase.auth.resetPasswordForEmail(email, {
+			redirectTo: `${window.origin}/update`,
 		});
-
-		if (error) {
-			setState({
-				status: STATUS.error,
-				error: 'Invalid credentials',
-			});
-			resetField('password');
-		} else {
-			router.push('/');
-		}
+		setState({ status: STATUS.sent });
 	};
 
 	const isLoading = state.status === STATUS.loading;
+	const isSent = state.status === STATUS.sent;
 
 	return (
 		<div className="flex h-full flex-col items-center justify-center">
@@ -79,38 +64,26 @@ export default function Login() {
 						/>
 					</Label>
 				</FieldWithError>
-
-				<FieldWithError error={errors.password?.message}>
-					<Label>
-						password
-						<Input
-							name="password"
-							type="password"
-							className={errors.password ? 'border-red-600' : ''}
-							{...register('password', { required: 'Password is required' })}
-						/>
-					</Label>
-
-					<div className="flex justify-center">
-						<Button
-							className="text-xs font-light hover:text-blue-400"
-							variant="link"
-							onClick={handleForgot}
-						>
-							Forgot password?
-						</Button>
-					</div>
-				</FieldWithError>
-
-				<Button className="mt-4" disabled={isLoading} type="submit">
-					{isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-					Log in
-				</Button>
-				{state.error ? (
-					<small className="text-center text-xs text-red-600">
-						{state.error}
-					</small>
-				) : null}
+				<div className="mt-4">
+					<Button
+						className="w-full"
+						disabled={isLoading || isSent}
+						type="submit"
+					>
+						{isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+						{isSent ? 'recovery link has been sent' : 'send recovery link'}
+					</Button>
+					{isSent || true ? (
+						<div className="flex justify-center">
+							<small className="font-light">check your inbox</small>
+						</div>
+					) : null}
+					{state.error ? (
+						<small className="text-center text-xs text-red-600">
+							{state.error}
+						</small>
+					) : null}
+				</div>
 			</form>
 		</div>
 	);

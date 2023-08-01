@@ -1,3 +1,4 @@
+'use client';
 import {
 	flexRender,
 	getCoreRowModel,
@@ -60,11 +61,13 @@ const columns = [
 		accessorKey: 'title',
 		header: 'Title',
 		cell: ({ row }) => {
-			const { title, description } = row.original;
+			const { title, description, isPaymentPending } = row.original;
 
 			return (
 				<div>
-					<p>{title}</p>
+					<p>
+						{title} {isPaymentPending ? <small>(pending payment)</small> : null}
+					</p>
 					<small>{description}</small>
 				</div>
 			);
@@ -72,10 +75,10 @@ const columns = [
 	},
 	{
 		accessorKey: 'created_at',
-		header: 'Date',
+		header: 'Paid on',
 		cell: ({ row }) => {
 			const date = row.getValue('created_at');
-			return formatDate(date);
+			return date ? formatDate(date) : '-';
 		},
 	},
 	{
@@ -86,13 +89,24 @@ const columns = [
 			const amount = parseFloat(row.getValue('amount'));
 			const formatted = formatCurrency(amount, currencyCode);
 
-			return <div className="text-right font-medium">{formatted}</div>;
+			return (
+				<div className="text-right font-medium">
+					{Number.isNaN(amount) ? '-' : formatted}
+				</div>
+			);
 		},
 	},
 	{
 		id: 'actions',
 		cell: ({ row }) => {
-			const { isPending, handleEdit, handleDelete, ...movement } = row.original;
+			const {
+				isPending,
+				isPaymentPending,
+				handleEdit,
+				handleDelete,
+				handlePay,
+				...movement
+			} = row.original;
 
 			return (
 				<div className="flex justify-center">
@@ -103,21 +117,31 @@ const columns = [
 								<MoreHorizontal className="h-4 w-4" />
 							</Button>
 						</DropdownMenuTrigger>
+
 						<DropdownMenuContent align="end">
 							<DropdownMenuLabel>Actions</DropdownMenuLabel>
-							<DropdownMenuItem onSelect={() => handleEdit(movement)}>
-								<Edit2 className="h-4 w-4" />
-								<span className="ml-2">Edit</span>
-							</DropdownMenuItem>
-							<DropdownItemDialog
-								// isPending={isPending}
-								onConfirm={() => handleDelete(movement)}
-								title="Title"
-								description="Are you sure you want to delete this movement?"
-							>
-								<Trash2 className="h-4 w-4" />
-								<span className="ml-2">Delete</span>
-							</DropdownItemDialog>
+							{isPaymentPending ? (
+								<DropdownMenuItem onSelect={() => handlePay(movement)}>
+									<Edit2 className="h-4 w-4" />
+									<span className="ml-2">Pay</span>
+								</DropdownMenuItem>
+							) : (
+								<>
+									<DropdownMenuItem onSelect={() => handleEdit(movement)}>
+										<Edit2 className="h-4 w-4" />
+										<span className="ml-2">Edit</span>
+									</DropdownMenuItem>
+									<DropdownItemDialog
+										title="Title"
+										description="Are you sure you want to delete this movement?"
+										isPending={isPending}
+										onConfirm={() => handleDelete(movement)}
+									>
+										<Trash2 className="h-4 w-4" />
+										<span className="ml-2">Delete</span>
+									</DropdownItemDialog>
+								</>
+							)}
 						</DropdownMenuContent>
 					</DropdownMenu>
 				</div>
@@ -126,7 +150,7 @@ const columns = [
 	},
 ];
 
-export default function MovementsList({ data }) {
+export default function List({ data }) {
 	const table = useReactTable({
 		data,
 		columns,
@@ -140,7 +164,7 @@ export default function MovementsList({ data }) {
 					<TableRow key={headerGroup.id}>
 						{headerGroup.headers.map(header => {
 							return (
-								<TableHead key={header.id}>
+								<TableHead key={header.id} className="text-gray-600">
 									{header.isPlaceholder
 										? null
 										: flexRender(
@@ -159,6 +183,7 @@ export default function MovementsList({ data }) {
 						<TableRow
 							key={row.id}
 							data-state={row.getIsSelected() && 'selected'}
+							className={row.original.isPaymentPending ? 'opacity-50' : null}
 						>
 							{row.getVisibleCells().map(cell => (
 								<TableCell key={cell.id}>

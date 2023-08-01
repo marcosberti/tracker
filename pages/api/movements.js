@@ -6,7 +6,7 @@ export default authRoute(async (req, res) => {
 		return createMovement(req, res);
 	} else if (req.method === 'PATCH') {
 		return updateMovement(req, res);
-	} else if (req.method === 'PUT') {
+	} else if (req.method === 'DELETE') {
 		return deleteMovement(req, res);
 	}
 });
@@ -76,7 +76,7 @@ const createMovement = async (req, res) => {
 		const paidInstallments = installment.paid_installments + 1;
 		rpc.data.installmentid = installmentId;
 		rpc.data.paidinstallments = paidInstallments;
-		rpc.data.activeinstallment = installment.installments > paidInstallments;
+		rpc.data.activeinstallment = installment.installments >= paidInstallments;
 
 		rpc.name = 'create_installment_movement';
 	}
@@ -84,7 +84,7 @@ const createMovement = async (req, res) => {
 	const { error } = await supabase.rpc(rpc.name, rpc.data);
 
 	if (error) {
-		res.status(400).json(error);
+		res.status(500).json(error);
 		return;
 	}
 
@@ -137,13 +137,13 @@ const updateMovement = async (req, res) => {
 const deleteMovement = async (req, res) => {
 	const supabase = createServerSupabaseClient({ req, res });
 
-	const { accountId, movementId } = req.body;
+	const { accountId, movementId } = req.query;
 
 	const [{ data: account }, { data: movement }] = await Promise.all([
-		supabase.from('accounts').select('balance').eq('id', accountId).single(),
+		supabase.from('accounts').select('id,balance').eq('id', accountId).single(),
 		supabase
 			.from('movements')
-			.select('amount,categories(movement_types(type)),installment_id')
+			.select('id,amount,categories(movement_types(type)),installment_id')
 			.eq('id', movementId)
 			.single(),
 	]);
@@ -176,13 +176,13 @@ const deleteMovement = async (req, res) => {
 		rpc.data.installmentid = movement.installment_id;
 		rpc.data.paidinstallments = installment.paid_installments - 1;
 		rpc.data.activeinstallment =
-			installment.installments > installment.paid_installments;
+			installment.installments >= installment.paid_installments;
 	}
 
 	const { error } = await supabase.rpc(rpc.name, rpc.data);
 
 	if (error) {
-		res.status(400).json(error);
+		res.status(400).json({ error, data: rpc.data });
 		return;
 	}
 
