@@ -23,6 +23,7 @@ const createMovement = async (req, res) => {
 		exchangeRate,
 		scheduledId,
 		installmentId,
+		parentMovementId,
 	} = req.body;
 
 	const [
@@ -55,9 +56,10 @@ const createMovement = async (req, res) => {
 			description: description,
 			amount: amount,
 			currencyid: currencyId,
-			exchangerate: exchangeRate || 0,
+			exchangerate: exchangeRate || null,
 			categoryid: categoryId,
 			scheduledid: scheduledId || null,
+			parentmovementid: parentMovementId || null,
 		},
 	};
 

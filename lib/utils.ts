@@ -111,3 +111,29 @@ export function timeout(ms: number = 5000) {
 		}, ms);
 	});
 }
+
+export function getTotalized(
+	account,
+	movements,
+	movementType: 'income' | 'spent',
+) {
+	const expenseMovs = movements.filter(
+		m => m.categories.movement_types.type === movementType,
+	);
+
+	const income = expenseMovs.reduce((acc, movement) => {
+		let amount;
+		if (movement.subItems?.length) {
+			amount = getTotalized(account, movement.subItems, movementType);
+		} else {
+			amount =
+				movement.currencies.id === account.currencies.id
+					? movement.amount
+					: movement.amount * movement.exchange_rate;
+		}
+
+		return acc + amount;
+	}, 0);
+
+	return income;
+}

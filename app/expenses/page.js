@@ -30,6 +30,7 @@ export default async function Expenses({
 
 	return (
 		<div className="flex flex-col gap-8">
+			<h2 className="text-xl font-semibold underline">manage your expenses</h2>
 			<Installments
 				accounts={accounts}
 				categories={categories}

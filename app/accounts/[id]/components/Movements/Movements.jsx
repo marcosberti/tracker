@@ -1,15 +1,17 @@
 'use client';
 import { useState } from 'react';
-import Sheet from './Sheet';
-import List from './List';
 import useMutation from '@/hooks/useMutation';
 import { useToast } from '@/components/ui/use-toast';
 import { Check, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import List from './List';
+import MovementSheet from './MovementSheet';
+import InstallmentSheet from './InstallmentSheet';
 
 const MODALS = {
-	edit: 'edit',
-	delete: 'delete',
+	EDIT: 'edit',
+	INSTALLMENT: 'installment',
+	SCHEDULED: 'scheduled',
 };
 
 const INITIAL_STATE = {
@@ -24,7 +26,14 @@ export default function Movements({ data, account, currencies, categories }) {
 	const [state, setState] = useState(INITIAL_STATE);
 
 	const handleEdit = movement => {
-		setState({ modal: MODALS.edit, movement });
+		setState({ modal: MODALS.EDIT, movement });
+	};
+
+	const handlePayment = item => {
+		const modal = item.isInstallment ? MODALS.INSTALLMENT : MODALS.SCHEDULED;
+		const key = item.isInstallment ? 'installment' : 'scheduled';
+
+		setState({ modal, [key]: item });
 	};
 
 	const handleDelete = movement => {
@@ -65,25 +74,36 @@ export default function Movements({ data, account, currencies, categories }) {
 		setState(INITIAL_STATE);
 	};
 
-	const _data = data.map(m => ({
-		...m,
-		isPending,
-		handleEdit,
-		handleDelete,
-	}));
-
 	return (
 		<>
-			<div className="rounded-md border">
-				<List data={_data} />
+			<div className="h-[calc(100vh-288px-4rem)] overflow-y-auto">
+				<List
+					isPending={isPending}
+					data={data}
+					accountCurrency={account.currencies}
+					onPayment={handlePayment}
+					onEdit={handleEdit}
+					onDelete={handleDelete}
+				/>
 			</div>
-			{state.modal === MODALS.edit ? (
-				<Sheet
+			{state.modal === MODALS.EDIT ? (
+				<MovementSheet
 					isOpen
 					account={account}
 					movement={state.movement}
+					movements={data}
 					currencies={currencies}
 					categories={categories}
+					onClose={handleClose}
+				/>
+			) : null}
+			{state.modal === MODALS.INSTALLMENT ? (
+				<InstallmentSheet
+					isOpen
+					account={account}
+					installment={state.installment}
+					movements={data}
+					currencies={currencies}
 					onClose={handleClose}
 				/>
 			) : null}

@@ -23,6 +23,7 @@ import { useRouter } from 'next/navigation';
 import { Controller, useForm } from 'react-hook-form';
 import useMutation from '@/hooks/useMutation';
 import FieldWithError from '@/app/components/FieldWithError';
+import { formatCurrency } from '@/lib/utils';
 
 function getDefaultValues(account, movement) {
 	return {
@@ -32,12 +33,14 @@ function getDefaultValues(account, movement) {
 		description: movement?.description,
 		categoryId: movement?.categories?.id,
 		currencyId: movement?.currencies?.id ?? account.currencies.id,
+		parentMovementId: movement?.parent_movement_id,
 	};
 }
 
 function MovementForm({
 	account,
 	movement,
+	movements,
 	categories,
 	currencies,
 	isPending,
@@ -46,12 +49,35 @@ function MovementForm({
 	const {
 		register,
 		control,
+		watch,
+		resetField,
 		handleSubmit,
 		formState: { errors },
 	} = useForm({ defaultValues: getDefaultValues(account, movement) });
 
+	const amountWatch = watch('amount');
+	const exchangeRateWatch = watch('exchangeRate');
+	const parentMovementIdWatch = watch('parentMovementId');
+	const parentMovement = movements.find(m => m.id === parentMovementIdWatch);
+	const currency = currencies.find(c => c.id === account.currencies.id);
+	const currencyWatch = watch('currencyId');
+	const isExchangeRateRequired = currencyWatch !== account.currencies.id;
+	const availableCategories = parentMovementIdWatch
+		? categories.filter(
+				c =>
+					c.movement_types.type ===
+					parentMovement.categories.movement_types.type,
+		  )
+		: categories;
+	const incomeCategories = availableCategories.filter(
+		c => c.movement_types.type === 'income',
+	);
+	const spentCategories = availableCategories.filter(
+		c => c.movement_types.type === 'spent',
+	);
+
 	return (
-		<form className="mt-4" onSubmit={handleSubmit(onSubmit)}>
+		<form className="mt-4" onSubmit={handleSubmit(onSubmit)} noValidate>
 			<fieldset disabled={isPending}>
 				<input hidden name="accountId" {...register('accountId')} />
 				<div className="mt-2 flex gap-2">
@@ -93,30 +119,28 @@ function MovementForm({
 										</SelectTrigger>
 										<SelectContent>
 											<SelectGroup>
-												<SelectLabel>Income</SelectLabel>
-												{categories
-													.filter(
-														category =>
-															category.movement_types.type === 'income',
-													)
-													.map(category => (
-														<SelectItem key={category.id} value={category.id}>
-															{category.name}
-														</SelectItem>
-													))}
+												{incomeCategories.length ? (
+													<>
+														<SelectLabel>Income</SelectLabel>
+														{incomeCategories.map(category => (
+															<SelectItem key={category.id} value={category.id}>
+																{category.name}
+															</SelectItem>
+														))}
+													</>
+												) : null}
 											</SelectGroup>
 											<SelectGroup>
-												<SelectLabel>Expense</SelectLabel>
-												{categories
-													.filter(
-														category =>
-															category.movement_types.type === 'spent',
-													)
-													.map(category => (
-														<SelectItem key={category.id} value={category.id}>
-															{category.name}
-														</SelectItem>
-													))}
+												{spentCategories.length ? (
+													<>
+														<SelectLabel>Expense</SelectLabel>
+														{spentCategories.map(category => (
+															<SelectItem key={category.id} value={category.id}>
+																{category.name}
+															</SelectItem>
+														))}
+													</>
+												) : null}
 											</SelectGroup>
 										</SelectContent>
 									</Select>
@@ -134,8 +158,18 @@ function MovementForm({
 							type="number"
 							className={errors.amount ? 'border-red-600' : ''}
 							{...register('amount', {
-								required: 'Amount is required',
 								valueAsNumber: true,
+								validate: value => {
+									if (Number.isNaN(value)) {
+										return 'Amount is required';
+									}
+
+									if (value < 0) {
+										return 'Amount must be greater than 0';
+									}
+
+									return null;
+								},
 							})}
 						/>
 					</FieldWithError>
@@ -175,6 +209,74 @@ function MovementForm({
 						/>
 					</FieldWithError>
 				</div>
+				{isExchangeRateRequired ? (
+					<div className="flex items-center gap-2">
+						<FieldWithError>
+							<Label
+								className={!isExchangeRateRequired ? 'text-gray-400' : null}
+								disabled={!isExchangeRateRequired}
+							>
+								Exchange rate
+								<Input
+									type="number"
+									disabled={!isExchangeRateRequired}
+									{...register('exchangeRate', {
+										valueAsNumber: true,
+										validate: value => {
+											if (Number.isNaN(value)) {
+												return 'Exchange rate is required';
+											}
+
+											if (value < 0) {
+												return 'Exchange rate must be greater than 0';
+											}
+
+											return null;
+										},
+									})}
+								/>
+							</Label>
+						</FieldWithError>
+						<div>
+							={' '}
+							{amountWatch && exchangeRateWatch
+								? formatCurrency(amountWatch * exchangeRateWatch, currency.code)
+								: null}
+						</div>
+					</div>
+				) : null}
+				<FieldWithError error={errors.parentMovementId?.message}>
+					<Label>
+						Belongs to
+						<Controller
+							name="parentMovementId"
+							control={control}
+							render={({ field }) => (
+								<Select
+									disabled={!movements.length}
+									defaultValue={field.value}
+									onValueChange={value => {
+										resetField('categoryId');
+										field.onChange(value);
+									}}
+								>
+									<SelectTrigger
+										className={errors.parentMovementId ? 'border-red-600' : ''}
+									>
+										<SelectValue placeholder="Select a parent element" />
+									</SelectTrigger>
+									<SelectContent>
+										{movements.map(movement => (
+											<SelectItem key={movement.id} value={movement.id}>
+												{movement.title}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							)}
+						/>
+					</Label>
+				</FieldWithError>
 				<Label htmlFor="description">
 					Description
 					<Textarea className="resize-none" {...register('description')} />
@@ -194,6 +296,7 @@ export default function MovementSheet({
 	isOpen,
 	account,
 	movement,
+	movements,
 	currencies,
 	categories,
 	onClose,
@@ -214,7 +317,7 @@ export default function MovementSheet({
 		onClose();
 	};
 
-	const onSubmit = values => {
+	const handleSubmit = values => {
 		const mutate = movement ? patchMutate : postMutate;
 		const data = movement ? { ...values, movementId: movement.id } : values;
 		mutate({
@@ -246,6 +349,15 @@ export default function MovementSheet({
 		});
 	};
 
+	let posibleParentMovements = movements.filter(
+		m => !m.isPaymentPending && !m.parent_movement_id,
+	);
+	if (movement) {
+		posibleParentMovements = posibleParentMovements.filter(
+			m => m.id !== movement.id,
+		);
+	}
+
 	return (
 		<Sheet open={isOpen} onOpenChange={handleClose}>
 			<SheetContent>
@@ -258,12 +370,13 @@ export default function MovementSheet({
 					</SheetTitle>
 				</SheetHeader>
 				<MovementForm
+					isPending={isPending}
 					account={account}
 					movement={movement}
+					movements={posibleParentMovements}
 					currencies={currencies}
 					categories={categories}
-					isPending={isPending}
-					onSubmit={onSubmit}
+					onSubmit={handleSubmit}
 				/>
 			</SheetContent>
 		</Sheet>

@@ -1,5 +1,5 @@
 'use client';
-import MovementSheet from '../Movements/Sheet';
+import MovementSheet from '../Movements/MovementSheet';
 import { Button } from '@/components/ui/button';
 import { DollarSign } from 'lucide-react';
 import { useState } from 'react';
@@ -8,7 +8,12 @@ const SHEETS = {
 	movement: 'movement',
 };
 
-export default function PayOptions({ account, currencies, categories }) {
+export default function PayOptions({
+	account,
+	movements,
+	currencies,
+	categories,
+}) {
 	const [openSheet, setOpenSheet] = useState();
 
 	const handleNewMovement = () => {
@@ -29,6 +34,7 @@ export default function PayOptions({ account, currencies, categories }) {
 				<MovementSheet
 					isOpen
 					account={account}
+					movements={movements}
 					currencies={currencies}
 					categories={categories}
 					onClose={handleSheetClose}

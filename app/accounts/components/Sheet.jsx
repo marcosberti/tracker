@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { patchAction } from '../actions';
+// import { patchAction } from '../actions';
 
 export default function AccountSheet({ isOpen, account, onOpenChange }) {
 	// TODO: add zod validations
@@ -25,7 +25,7 @@ export default function AccountSheet({ isOpen, account, onOpenChange }) {
 				<SheetHeader>
 					<SheetTitle>{account ? 'Edit' : 'Create'} account</SheetTitle>
 				</SheetHeader>
-				<form action={patchAction} className="mt-4">
+				<form className="mt-4">
 					<div className="mb-2">
 						<Label htmlFor="name">Name</Label>
 						<Input id="name" name="name" />
