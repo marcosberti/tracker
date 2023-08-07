@@ -1,4 +1,4 @@
-import Icon from '@/app/components/Icon';
+import Icon from '@/app/components/icon';
 import { formatCurrency } from '@/lib/utils';
 
 export default function SummarizedCategories({ account, summarized }) {

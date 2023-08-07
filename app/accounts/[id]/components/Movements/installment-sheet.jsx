@@ -19,7 +19,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Controller, useForm } from 'react-hook-form';
-import FieldWithError from '@/app/components/FieldWithError';
+import FieldWithError from '@/app/components/field-with-error';
 import { formatCurrency } from '@/lib/utils';
 import { Check, Loader2, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -62,7 +62,7 @@ function InstallmentForm({
 				className={isPending ? 'text-gray-400' : null}
 			>
 				<div className="flex gap-2">
-					<FieldWithError error={errors.amount?.message}>
+					<FieldWithError className="basis-1/2" error={errors.amount?.message}>
 						<Label>
 							Amount
 							<Input
@@ -85,7 +85,10 @@ function InstallmentForm({
 							/>
 						</Label>
 					</FieldWithError>
-					<FieldWithError error={errors.currencyId?.message}>
+					<FieldWithError
+						className="basis-1/2"
+						error={errors.currencyId?.message}
+					>
 						<Label>
 							Currency
 							<Controller
@@ -128,7 +131,10 @@ function InstallmentForm({
 				</div>
 				{isExchangeRateRequired ? (
 					<div className="flex items-center gap-2">
-						<FieldWithError>
+						<FieldWithError
+							className="basis-1/2"
+							error={errors.exchangeRate?.message}
+						>
 							<Label
 								className={!isExchangeRateRequired ? 'text-gray-400' : null}
 								disabled={!isExchangeRateRequired}
@@ -136,6 +142,7 @@ function InstallmentForm({
 								Exchange rate
 								<Input
 									type="number"
+									className={errors.exchangeRate ? 'border-red-600' : ''}
 									disabled={!isExchangeRateRequired}
 									{...register('exchangeRate', {
 										valueAsNumber: true,

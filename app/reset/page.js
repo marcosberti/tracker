@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { createBrowserClient } from '@/lib/supabase-browser';
 import { useForm } from 'react-hook-form';
-import FieldWithError from '../components/FieldWithError';
+import FieldWithError from '../components/field-with-error';
 
 const STATUS = {
 	idle: 'idle',

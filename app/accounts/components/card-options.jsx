@@ -5,7 +5,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import DropdownItemDialog from '@/app/components/DropdownItemDialog';
+import DropdownItemDialog from '@/app/components/dropdown-item-dialog';
 
 export default function CardOptions({
 	isPending,

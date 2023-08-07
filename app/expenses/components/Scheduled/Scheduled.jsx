@@ -1,10 +1,10 @@
 'use client';
 import { Check, Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import SwitchFilter from '@/app/components/SwitchFilter';
-import List from './List';
+import SwitchFilter from '@/app/components/switch-filter';
+import List from './list';
 import { useState } from 'react';
-import Sheet from './Sheet';
+import Sheet from './sheet';
 import useMutation from '@/hooks/useMutation';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/ui/use-toast';

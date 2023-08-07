@@ -1,7 +1,7 @@
 import { createServerClient } from '@/lib/supabase-server';
 import { getMonthsDates } from '@/lib/utils';
-import MonthChart from './MonthChart';
-import MonthlyChart from './MonthlyChart';
+import MonthChart from './month-chart';
+import MonthlyChart from './monthly-chart';
 
 const getData = async () => {
 	const supabase = createServerClient();
@@ -10,7 +10,6 @@ const getData = async () => {
 		.from('accounts')
 		.select('id,balance,currencies(code)')
 		.eq('main', true)
-		.limit(1)
 		.single();
 
 	const dates = getMonthsDates();
@@ -30,7 +29,7 @@ const getData = async () => {
 
 	const currentMonth = new Date().getMonth();
 	return {
-		account,
+		account: account ?? {},
 		monthsData: monthsData.map(res => res.data[0]),
 		monthData: {}, //monthsData[currentMonth].data[0],
 	};

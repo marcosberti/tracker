@@ -1,5 +1,5 @@
 import { createServerClient } from '@/lib/supabase-server';
-import Scheduled from './Scheduled';
+import Scheduled from './scheduled';
 
 const PAGE_SIZE = 4;
 
@@ -19,7 +19,7 @@ async function getScheduled({
 	const scheduledQuery = supabase
 		.from('scheduled_expenses')
 		.select(
-			'id,title,description,amount,from_date,to_date,categories(icon,color,name),accounts(id,name,currencies(code)),active',
+			'id,title,description,amount,from_date,to_date,categories(id,icon,color,name),accounts(id,name,currencies(code)),active',
 		)
 		.order('title', { ascending: true })
 		.range(from, to);

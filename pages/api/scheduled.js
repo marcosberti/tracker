@@ -30,15 +30,13 @@ const updateScheduled = async (req, res) => {
 	const supabase = createServerSupabaseClient({ req, res });
 	const { scheduledId, ...scheduled } = req.body;
 
-	const {
-		data: { account_id },
-	} = await supabase
+	const { data } = await supabase
 		.from('movements')
 		.select('account_id')
 		.eq('scheduled_id', scheduledId)
 		.single();
 
-	if (account_id && account_id !== scheduled.account_id) {
+	if (data?.account_id && data?.account_id !== scheduled.account_id) {
 		res.status(400).json({
 			message: 'Cannot change the account once a payment has been done',
 		});

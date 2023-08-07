@@ -26,8 +26,8 @@ import {
 } from '@/components/ui/tooltip';
 import { Check, Edit2, MoreHorizontal, Trash2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import Icon from '@/app/components/Icon';
-import DropdownItemDialog from '@/app/components/DropdownItemDialog';
+import Icon from '@/app/components/icon';
+import DropdownItemDialog from '@/app/components/dropdown-item-dialog';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 

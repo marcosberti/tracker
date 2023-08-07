@@ -20,10 +20,10 @@ import {
 	Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { formatCurrency, formatDate, getTotalized } from '@/lib/utils';
-import Icon from '@/app/components/Icon';
-import DropdownItemDialog from '@/app/components/DropdownItemDialog';
+import Icon from '@/app/components/icon';
+import DropdownItemDialog from '@/app/components/dropdown-item-dialog';
 import { Badge } from '@/components/ui/badge';
+import { formatCurrency, formatDate, getTotalized } from '@/lib/utils';
 
 function getItemAmount(item, accountCurrency) {
 	const isSameCurrency = item.currencies.id === accountCurrency.id;
@@ -61,7 +61,7 @@ function Item({ item, accountCurrency }) {
 
 	return (
 		<>
-			<div className={`flex basis-[${WIDTHS.ICON}] justify-center`}>
+			<div className={`${WIDTHS.ICON} justify-center`}>
 				{item.subItems?.length ? (
 					<Layers />
 				) : (
@@ -71,7 +71,7 @@ function Item({ item, accountCurrency }) {
 					/>
 				)}
 			</div>
-			<p className={`basis-[${WIDTHS.TITLE}] text-start`}>
+			<p className={`${WIDTHS.TITLE} text-start`}>
 				{item.title}{' '}
 				{expenseType ? <Badge variant="secondary">{expenseType}</Badge> : null}
 				{item.isPaymentPending ? (
@@ -79,10 +79,10 @@ function Item({ item, accountCurrency }) {
 				) : null}
 				{item.description ? <small>{item.description}</small> : null}
 			</p>
-			<p className={`basis-[${WIDTHS.PAID_ON}] text-start`}>
+			<p className={`${WIDTHS.PAID_ON} text-start`}>
 				{item.created_at ? formatDate(item.created_at) : '-'}
 			</p>
-			<div className={`flex flex-col basis-[${WIDTHS.AMOUNT}] text-end`}>
+			<div className={`flex flex-col ${WIDTHS.AMOUNT} text-end`}>
 				{!amount ? '-' : null}
 				{amount && isSameCurrency ? (
 					<div className="flex items-center justify-end  gap-2">
@@ -112,7 +112,7 @@ function Item({ item, accountCurrency }) {
 
 function Actions({ isPending, item, onPayment, onEdit, onDelete }) {
 	return (
-		<div className={`flex justify-center basis-[${WIDTHS.ACTIONS}]`}>
+		<div className={`flex justify-center ${WIDTHS.ACTIONS}`}>
 			<DropdownMenu>
 				<DropdownMenuTrigger asChild>
 					<Button variant="ghost" className="h-8 w-8 p-0">
@@ -169,7 +169,7 @@ function AccordionItem({
 					className="p-0 hover:no-underline"
 					disabled={!item.subItems?.length}
 				>
-					<div className="flex basis-[90%]">
+					<div className="flex basis-[90%] items-center">
 						<Item item={item} accountCurrency={accountCurrency} />
 					</div>
 				</AccordionTrigger>
@@ -199,11 +199,11 @@ function AccordionItem({
 }
 
 const WIDTHS = {
-	ICON: '10%',
-	TITLE: '39%',
-	PAID_ON: '29%',
-	AMOUNT: '22%',
-	ACTIONS: '10%',
+	ICON: 'basis-[10%]',
+	TITLE: 'basis-[39%]',
+	PAID_ON: 'basis-[29%]',
+	AMOUNT: 'basis-[22%]',
+	ACTIONS: 'basis-[10%]',
 };
 
 export default function List({
@@ -218,12 +218,12 @@ export default function List({
 		<div className="flex flex-col rounded-md border">
 			<div className="flex justify-between border-b-2 p-4">
 				<div className="flex flex-1 font-semibold">
-					<div className={`basis-[${WIDTHS.ICON}]`} />
-					<p className={`basis-[${WIDTHS.TITLE}]`}>Title</p>
-					<p className={`basis-[${WIDTHS.PAID_ON}]`}>Paid on</p>
-					<p className={`basis-[${WIDTHS.AMOUNT}] text-end`}>Amount</p>
+					<div className={WIDTHS.ICON} />
+					<p className={WIDTHS.TITLE}>Title</p>
+					<p className={WIDTHS.PAID_ON}>Paid on</p>
+					<p className={`${WIDTHS.AMOUNT} text-end`}>Amount</p>
 				</div>
-				<div className={`basis-[${WIDTHS.ACTIONS}]`} />
+				<div className={WIDTHS.ACTIONS} />
 			</div>
 			{data.map(item => (
 				<div

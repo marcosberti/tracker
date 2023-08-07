@@ -22,7 +22,7 @@ import { Check, X, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Controller, useForm } from 'react-hook-form';
 import useMutation from '@/hooks/useMutation';
-import FieldWithError from '@/app/components/FieldWithError';
+import FieldWithError from '@/app/components/field-with-error';
 import { formatCurrency } from '@/lib/utils';
 
 function getDefaultValues(account, movement) {
@@ -77,11 +77,15 @@ function MovementForm({
 	);
 
 	return (
-		<form className="mt-4" onSubmit={handleSubmit(onSubmit)} noValidate>
+		<form
+			className="mt-4 flex flex-col gap-2"
+			onSubmit={handleSubmit(onSubmit)}
+			noValidate
+		>
 			<fieldset disabled={isPending}>
 				<input hidden name="accountId" {...register('accountId')} />
-				<div className="mt-2 flex gap-2">
-					<FieldWithError error={errors.title?.message}>
+				<div className="flex gap-2">
+					<FieldWithError className="basis-1/2" error={errors.title?.message}>
 						<Label>
 							Title
 							<Input
@@ -92,7 +96,10 @@ function MovementForm({
 							/>
 						</Label>
 					</FieldWithError>
-					<FieldWithError error={errors.categoryId?.message}>
+					<FieldWithError
+						className="basis-1/2"
+						error={errors.categoryId?.message}
+					>
 						<Label htmlFor="category">
 							Category
 							<Controller
@@ -149,8 +156,8 @@ function MovementForm({
 						</Label>
 					</FieldWithError>
 				</div>
-				<div className="mt-2 flex gap-2">
-					<FieldWithError error={errors.amount?.message}>
+				<div className="flex gap-2">
+					<FieldWithError className="basis-1/2" error={errors.amount?.message}>
 						<Label htmlFor="amount">Amount</Label>
 						<Input
 							id="amount"
@@ -173,7 +180,10 @@ function MovementForm({
 							})}
 						/>
 					</FieldWithError>
-					<FieldWithError error={errors.currencyId?.message}>
+					<FieldWithError
+						className="basis-1/2"
+						error={errors.currencyId?.message}
+					>
 						<Label htmlFor="currency">Currency</Label>
 						<Controller
 							name="currencyId"
@@ -211,7 +221,10 @@ function MovementForm({
 				</div>
 				{isExchangeRateRequired ? (
 					<div className="flex items-center gap-2">
-						<FieldWithError>
+						<FieldWithError
+							className="basis-1/2"
+							error={errors.exchangeRate?.message}
+						>
 							<Label
 								className={!isExchangeRateRequired ? 'text-gray-400' : null}
 								disabled={!isExchangeRateRequired}
@@ -219,6 +232,7 @@ function MovementForm({
 								Exchange rate
 								<Input
 									type="number"
+									className={errors.exchangeRate ? 'border-red-600' : ''}
 									disabled={!isExchangeRateRequired}
 									{...register('exchangeRate', {
 										valueAsNumber: true,

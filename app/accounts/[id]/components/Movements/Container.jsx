@@ -1,5 +1,5 @@
 import { createServerClient } from '@/lib/supabase-server';
-import Movements from './Movements';
+import Movements from './movements';
 
 function getPaidExpenses(movements, expenseIdKey) {
 	return movements.reduce((acc, movement) => {

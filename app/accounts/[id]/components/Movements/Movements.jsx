@@ -4,9 +4,9 @@ import useMutation from '@/hooks/useMutation';
 import { useToast } from '@/components/ui/use-toast';
 import { Check, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import List from './List';
-import MovementSheet from './MovementSheet';
-import InstallmentSheet from './InstallmentSheet';
+import List from './list';
+import MovementSheet from './movement-sheet';
+import InstallmentSheet from './installment-sheet';
 
 const MODALS = {
 	EDIT: 'edit',

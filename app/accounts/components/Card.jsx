@@ -1,27 +1,61 @@
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { COLORS, formatCurrency, formatDate } from '@/lib/utils';
 import Link from 'next/link';
-import CardOptions from './CardOptions';
-import Icon from '@/app/components/Icon';
+import CardOptions from './card-options';
+import Icon from '@/app/components/icon';
+import { Badge } from '@/components/ui/badge';
+
+const RULES = [
+	'group-hover:shadow-color-100',
+	'bg-color-300/[.4]',
+	'text-color-700',
+];
+
+const COLOR_CLASES = COLORS.reduce((acc, color) => {
+	const [container, circle, icon] = RULES.map(rule =>
+		rule.replace('color', color),
+	);
+
+	acc[color] = {
+		container,
+		circle,
+		icon,
+	};
+
+	return acc;
+}, {});
 
 export default function Item({ account, isPending, onEdit, onDelete }) {
-	const canDelete = !account.balance && account.latest_movement === null;
-	const containerClass = `drop-shadow-2xl" rounded-lg p-4 shadow-lg group-hover:shadow-${account.color}-100`;
-	const cicleClass = `absolute right-4 top-4 bg-${account.color}-300/[.4] rounded-full p-3`;
-	const iconClass = `text-${account.color}-700`;
+	const canDelete = account.latest_movement === null;
 
 	return (
 		<div className="group relative w-[250px] cursor-pointer opacity-70 transition-all hover:opacity-100">
 			<Link href={`/accounts/${account.id}`}>
-				<div className={containerClass}>
-					<p className="text-sm font-light">{account.name}</p>
+				<div
+					className={`drop-shadow-2xl" rounded-lg p-4 shadow-lg ${
+						COLOR_CLASES[account.color].container
+					}`}
+				>
+					<div className="flex items-center gap-2">
+						<p className="text-md ">{account.name}</p>
+						{account.main ? <Badge variant="secondary">main</Badge> : null}
+					</div>
 					<p className="text-xl font-semibold">
 						{formatCurrency(account.balance, account.currencies.code)}
 					</p>
 					<p className="mt-2 text-xs font-light">
-						Latest activity: {formatDate(account.latest_movement)}
+						{account.latest_movement
+							? `Latest activity: ${formatDate(account.latest_movement)}`
+							: 'No activity yet'}
 					</p>
-					<div className={cicleClass}>
-						<Icon icon={account.icon} className={iconClass} />
+					<div
+						className={`absolute right-4 top-4 ${
+							COLOR_CLASES[account.color].circle
+						} rounded-full p-3`}
+					>
+						<Icon
+							icon={account.icon}
+							className={`${COLOR_CLASES[account.color].icon}`}
+						/>
 					</div>
 				</div>
 			</Link>

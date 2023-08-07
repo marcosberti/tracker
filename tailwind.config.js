@@ -1,20 +1,11 @@
 /** @type {import('tailwindcss').Config} */
+const { COLORS } = require('./lib/utils');
 
-const colors = [
-	'blue',
-	'purple',
-	'indigo',
-	'green',
-	'red',
-	'fuchsia',
-	'teal',
-	'yellow',
-	'orange',
-];
 const rules = [
 	'text-color-700',
 	'bg-color-300/[.4]',
 	'bg-color-200',
+	'bg-color-600',
 	'group-hover:shadow-color-100',
 	'bg-color-50',
 	'bg-color-50/[.5]',
@@ -22,7 +13,7 @@ const rules = [
 
 const safeList = rules
 	.map(rule => {
-		return colors.map(color => rule.replace('color', color));
+		return COLORS.map(color => rule.replace('color', color));
 	})
 	.reduce((acc, colorRules) => {
 		return [...acc, ...colorRules];

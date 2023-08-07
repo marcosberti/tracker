@@ -14,7 +14,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import FieldWithError from '@/app/components/FieldWithError';
+import FieldWithError from '@/app/components/field-with-error';
 import { Controller, useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Check, Loader2, X } from 'lucide-react';
@@ -51,10 +51,14 @@ const ScheduledForm = ({
 	const isAccountDisabled = Boolean(scheduled);
 
 	return (
-		<form onSubmit={handleSubmit(onSubmit)} noValidate>
+		<form
+			className="mt-4 flex flex-col gap-2"
+			onSubmit={handleSubmit(onSubmit)}
+			noValidate
+		>
 			<fieldset disabled={isPending}>
-				<div className="mt-2 flex gap-2">
-					<FieldWithError error={errors.title?.message}>
+				<div className="flex gap-2">
+					<FieldWithError className="basis-1/2" error={errors.title?.message}>
 						<Label>
 							Title
 							<Input
@@ -65,7 +69,7 @@ const ScheduledForm = ({
 							/>
 						</Label>
 					</FieldWithError>
-					<FieldWithError error={errors.amount?.message}>
+					<FieldWithError className="basis-1/2" error={errors.amount?.message}>
 						<Label htmlFor="amount">Amount</Label>
 						<Input
 							id="amount"
@@ -90,8 +94,11 @@ const ScheduledForm = ({
 						/>
 					</FieldWithError>
 				</div>
-				<div className="mt-2 flex gap-2">
-					<FieldWithError error={errors.from_date?.message}>
+				<div className=" flex gap-2">
+					<FieldWithError
+						className="basis-1/2"
+						error={errors.from_date?.message}
+					>
 						<Label>
 							From
 							<Input
@@ -118,8 +125,11 @@ const ScheduledForm = ({
 						</Label>
 					</FieldWithError> */}
 				</div>
-				<div className="mt-2 flex gap-2">
-					<FieldWithError error={errors.account_id?.message}>
+				<div className="flex gap-2">
+					<FieldWithError
+						className="basis-1/2"
+						error={errors.account_id?.message}
+					>
 						<Label htmlFor="account">Account</Label>
 						<Controller
 							name="account_id"
@@ -155,7 +165,10 @@ const ScheduledForm = ({
 							)}
 						/>
 					</FieldWithError>
-					<FieldWithError error={errors.category_id?.message}>
+					<FieldWithError
+						className="basis-1/2"
+						error={errors.category_id?.message}
+					>
 						<Label htmlFor="category">Category</Label>
 						<Controller
 							name="category_id"

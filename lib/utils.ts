@@ -2,6 +2,27 @@ import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs';
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
+export const COLORS = [
+	'stone',
+	'red',
+	'orange',
+	'amber',
+	'yellow',
+	'lime',
+	'green',
+	'emerald',
+	'teal',
+	'cyan',
+	'sky',
+	'blue',
+	'indigo',
+	'violet',
+	'purple',
+	'fuchsia',
+	'pink',
+	'rose',
+];
+
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }

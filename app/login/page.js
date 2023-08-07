@@ -7,7 +7,7 @@ import { Loader2 } from 'lucide-react';
 import { createBrowserClient } from '@/lib/supabase-browser';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
-import FieldWithError from '../components/FieldWithError';
+import FieldWithError from '../components/field-with-error';
 
 const STATUS = {
 	idle: 'idle',

@@ -1,8 +1,8 @@
-import Actions from './components/Actions';
-import Breadcrumb from './components/Breadcrumb';
-import Overview from './components/Overview';
-import SummarizedCategories from './components/SummarizedCategories';
-import Movements from './components/Movements';
+import Actions from './components/actions';
+import Breadcrumb from './components/breadcrumb';
+import Overview from './components/overview';
+import SummarizedCategories from './components/summarized-categories';
+import Movements from './components/movements';
 import { createServerClient } from '@/lib/supabase-server';
 import { getMonthDates, getTotalized } from '@/lib/utils';
 

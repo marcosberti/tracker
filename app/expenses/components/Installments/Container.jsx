@@ -1,5 +1,5 @@
 import { createServerClient } from '@/lib/supabase-server';
-import Installments from './Installments';
+import Installments from './installments';
 
 const PAGE_SIZE = 5;
 

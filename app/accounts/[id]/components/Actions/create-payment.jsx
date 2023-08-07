@@ -1,5 +1,5 @@
 'use client';
-import MovementSheet from '../Movements/MovementSheet';
+import MovementSheet from '../movements/movement-sheet';
 import { Button } from '@/components/ui/button';
 import { DollarSign } from 'lucide-react';
 import { useState } from 'react';
@@ -28,7 +28,7 @@ export default function PayOptions({
 		<>
 			<Button onClick={handleNewMovement}>
 				<span className="sr-only">Create payment</span>
-				<DollarSign className="h-4 w-4 text-white " />
+				<DollarSign className="h-4 w-4" />
 			</Button>
 			{openSheet === SHEETS.movement ? (
 				<MovementSheet
