@@ -50,7 +50,6 @@ function MovementForm({
 		register,
 		control,
 		watch,
-		resetField,
 		handleSubmit,
 		formState: { errors },
 	} = useForm({ defaultValues: getDefaultValues(account, movement) });
@@ -116,6 +115,7 @@ function MovementForm({
 								}}
 								render={({ field }) => (
 									<Select
+										disabled={!!movement}
 										defaultValue={field.value}
 										onValueChange={field.onChange}
 									>
@@ -171,9 +171,9 @@ function MovementForm({
 										return 'Amount is required';
 									}
 
-									if (value < 0) {
-										return 'Amount must be greater than 0';
-									}
+									// if (value < 0) {
+									// 	return 'Amount must be greater than 0';
+									// }
 
 									return null;
 								},
@@ -269,10 +269,7 @@ function MovementForm({
 								<Select
 									disabled={!movements.length}
 									defaultValue={field.value}
-									onValueChange={value => {
-										resetField('categoryId');
-										field.onChange(value);
-									}}
+									onValueChange={field.onChange}
 								>
 									<SelectTrigger
 										className={errors.parentMovementId ? 'border-red-600' : ''}
@@ -280,6 +277,9 @@ function MovementForm({
 										<SelectValue placeholder="Select a parent element" />
 									</SelectTrigger>
 									<SelectContent>
+										<SelectItem value={null}>
+											Select a parent element
+										</SelectItem>
 										{movements.map(movement => (
 											<SelectItem key={movement.id} value={movement.id}>
 												{movement.title}

@@ -19,24 +19,24 @@ import {
 	MoreHorizontal,
 	Trash2,
 } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import Icon from '@/app/components/icon';
 import DropdownItemDialog from '@/app/components/dropdown-item-dialog';
 import { Badge } from '@/components/ui/badge';
 import { formatCurrency, formatDate, getTotalized } from '@/lib/utils';
+import { Checkbox } from '@/components/ui/checkbox';
 
-function getItemAmount(item, accountCurrency) {
-	const isSameCurrency = item.currencies.id === accountCurrency.id;
-	let amount = !Number.isNaN(item.amount) ? item.amount : null;
+const WIDTHS = {
+	CHECK: 'basis-[5%]',
+	ICON: 'basis-[5%]',
+	TITLE: 'basis-[39%]',
+	PAID_ON: 'basis-[29%]',
+	AMOUNT: 'basis-[22%]',
+	ACTIONS: 'basis-[10%]',
+};
 
-	if (!isSameCurrency && amount) {
-		amount *= item.exchange_rate;
-	}
-
-	return amount;
-}
-
-function Item({ item, accountCurrency }) {
+function ItemContent({ isSelected, item, accountCurrency, onSelected }) {
 	const isSameCurrency = item.currencies.id === accountCurrency.id;
 	let amount = !Number.isNaN(item.amount) ? item.amount : null;
 	let expenseType;
@@ -51,34 +51,42 @@ function Item({ item, accountCurrency }) {
 	let showWarning = false;
 	let totalItems = null;
 	if (item.subItems?.length) {
-		totalItems = getTotalized(
-			{ currencies: accountCurrency },
-			item.subItems,
-			item.categories.movement_types.type,
+		const filteredItems = item.subItems.filter(
+			i =>
+				i.categories.movement_types.type ===
+				item.categories.movement_types.type,
 		);
+		totalItems = getTotalized(accountCurrency, filteredItems);
 		showWarning = totalItems !== amount;
 	}
 
 	return (
 		<>
-			<div className={`${WIDTHS.ICON} justify-center`}>
-				{item.subItems?.length ? (
-					<Layers />
-				) : (
-					<Icon
-						icon={item.categories.icon}
-						className={`text-${item.categories.color}-700`}
-					/>
-				)}
+			<div className={`${WIDTHS.CHECK} flex justify-center`}>
+				<Checkbox
+					checked={isSelected}
+					onCheckedChange={() => onSelected(item)}
+				/>
 			</div>
-			<p className={`${WIDTHS.TITLE} text-start`}>
+			<div className={`${WIDTHS.ICON} flex justify-center`}>
+				<Icon
+					icon={item.categories.icon}
+					className={`text-${item.categories.color}-700`}
+				/>
+			</div>
+			<div className={`${WIDTHS.TITLE} text-start`}>
 				{item.title}{' '}
+				{item.isInstallment ? (
+					<small>
+						({item.paid_installments + 1}/{item.installments})
+					</small>
+				) : null}
 				{expenseType ? <Badge variant="secondary">{expenseType}</Badge> : null}
 				{item.isPaymentPending ? (
 					<Badge variant="outline">pending payment</Badge>
 				) : null}
 				{item.description ? <small>{item.description}</small> : null}
-			</p>
+			</div>
 			<p className={`${WIDTHS.PAID_ON} text-start`}>
 				{item.created_at ? formatDate(item.created_at) : '-'}
 			</p>
@@ -151,13 +159,50 @@ function Actions({ isPending, item, onPayment, onEdit, onDelete }) {
 	);
 }
 
-function AccordionItem({
+function Item({
+	isPending,
+	isSelected,
 	item,
 	accountCurrency,
-	isPending,
 	onPayment,
 	onEdit,
 	onDelete,
+	onSelected,
+}) {
+	return (
+		<>
+			<div
+				className={`flex flex-1 items-center ${
+					item.isPaymentPending ? 'opacity-50' : null
+				}`}
+			>
+				<ItemContent
+					isSelected={isSelected}
+					item={item}
+					accountCurrency={accountCurrency}
+					onSelected={onSelected}
+				/>
+			</div>
+			<Actions
+				isPending={isPending}
+				item={item}
+				onPayment={onPayment}
+				onEdit={onEdit}
+				onDelete={onDelete}
+			/>
+		</>
+	);
+}
+
+function AccordionItem({
+	isPending,
+	selected,
+	item,
+	accountCurrency,
+	onPayment,
+	onEdit,
+	onDelete,
+	onSelected,
 }) {
 	return (
 		<Accordion type="single" collapsible className="w-full">
@@ -170,17 +215,24 @@ function AccordionItem({
 					disabled={!item.subItems?.length}
 				>
 					<div className="flex basis-[90%] items-center">
-						<Item item={item} accountCurrency={accountCurrency} />
+						<ItemContent
+							isSelected={selected.has(item.id)}
+							item={item}
+							accountCurrency={accountCurrency}
+							onSelected={onSelected}
+						/>
 					</div>
 				</AccordionTrigger>
 				<AccordionContent className="mt-4 bg-gray-100">
 					<div className="rounded-full px-4 pt-4">
 						{item.subItems?.map(subItem => (
-							<div className="flex items-center py-2">
-								<Item
+							<div key={subItem.id} className="flex items-center py-2">
+								<ItemContent
 									key={subItem.id}
+									isSelected={selected.has(subItem.id)}
 									item={subItem}
 									accountCurrency={accountCurrency}
+									onSelected={onSelected}
 								/>
 								<Actions
 									isPending={isPending}
@@ -198,13 +250,34 @@ function AccordionItem({
 	);
 }
 
-const WIDTHS = {
-	ICON: 'basis-[10%]',
-	TITLE: 'basis-[39%]',
-	PAID_ON: 'basis-[29%]',
-	AMOUNT: 'basis-[22%]',
-	ACTIONS: 'basis-[10%]',
-};
+function getSelectedTotalized(selected, items, accountCurrency) {
+	const selectedItems = items
+		.filter(
+			i => selected.has(i.id) || i.subItems?.some(si => selected.has(si.id)),
+		)
+		.map(i => {
+			if (!i.categories.is_group_item) return i;
+
+			const isParentItemSelected = selected.has(i.id);
+
+			if (isParentItemSelected) {
+				const {
+					categories: { is_group_item, ...categories },
+					subItems,
+					...item
+				} = i;
+				return { ...item, categories };
+			}
+
+			const subItems = i.subItems.filter(si => selected.has(si.id));
+			return {
+				...i,
+				subItems,
+			};
+		});
+
+	return getTotalized(accountCurrency, selectedItems);
+}
 
 export default function List({
 	isPending,
@@ -214,10 +287,41 @@ export default function List({
 	onEdit,
 	onDelete,
 }) {
+	const [selected, setSelected] = useState(new Set());
+	const total = selected.size
+		? getSelectedTotalized(selected, data, accountCurrency)
+		: null;
+
+	const handleSelectedItem = item => {
+		setSelected(old => {
+			const setlected = new Set(old);
+			const isSelected = !!setlected.has(item.id);
+			const method = isSelected ? 'delete' : 'add';
+			setlected[method](item.id);
+
+			return setlected;
+		});
+	};
+
+	const handleSelectAll = () => {
+		if (data.length === selected.size) {
+			setSelected(new Set());
+		} else {
+			const ids = data.map(i => i.id);
+			setSelected(new Set(ids));
+		}
+	};
+
 	return (
-		<div className="flex flex-col rounded-md border">
-			<div className="flex justify-between border-b-2 p-4">
-				<div className="flex flex-1 font-semibold">
+		<div className="relative flex flex-col rounded-md border-x-[1px]">
+			<div className="sticky top-0 z-[1] flex justify-between rounded-t-md border-b-[1px] border-t-[1px] bg-white p-4">
+				<div className="flex flex-1 items-center font-semibold">
+					<div className={`${WIDTHS.CHECK} flex justify-center`}>
+						<Checkbox
+							checked={data.length === selected.size}
+							onCheckedChange={handleSelectAll}
+						/>
+					</div>
 					<div className={WIDTHS.ICON} />
 					<p className={WIDTHS.TITLE}>Title</p>
 					<p className={WIDTHS.PAID_ON}>Paid on</p>
@@ -228,37 +332,44 @@ export default function List({
 			{data.map(item => (
 				<div
 					key={item.id}
-					className="flex items-center border-b-[1px] px-4 py-6"
+					className="flex items-center border-b-[1px] p-4 last-of-type:rounded-b-md"
 				>
 					{item.subItems?.length ? (
 						<AccordionItem
 							isPending={isPending}
+							selected={selected}
 							item={item}
 							accountCurrency={accountCurrency}
 							onPayment={onPayment}
 							onEdit={onEdit}
 							onDelete={onDelete}
+							onSelected={handleSelectedItem}
 						/>
 					) : (
-						<>
-							<div
-								className={`flex flex-1 items-center ${
-									item.isPaymentPending ? 'opacity-50' : null
-								}`}
-							>
-								<Item item={item} accountCurrency={accountCurrency} />
-							</div>
-							<Actions
-								isPending={isPending}
-								item={item}
-								onPayment={onPayment}
-								onEdit={onEdit}
-								onDelete={onDelete}
-							/>
-						</>
+						<Item
+							isPending={isPending}
+							isSelected={selected.has(item.id)}
+							item={item}
+							accountCurrency={accountCurrency}
+							onPayment={onPayment}
+							onEdit={onEdit}
+							onDelete={onDelete}
+							onSelected={handleSelectedItem}
+						/>
 					)}
 				</div>
 			))}
+			{total ? (
+				<div className="sticky bottom-0 flex flex-1 rounded-b-md border-y-[1px] bg-gray-50 p-4">
+					<div className="flex flex-1 items-end justify-end gap-2">
+						<small className="font-light">total:</small>
+						<p className="font-semibold">
+							{formatCurrency(total, accountCurrency.code)}
+						</p>
+					</div>
+					<div className="basis-[10%]" />
+				</div>
+			) : null}
 			{!data.length ? (
 				<div className="flex justify-center py-6">
 					<p>No movements on this month</p>

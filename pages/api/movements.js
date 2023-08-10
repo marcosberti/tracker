@@ -1,5 +1,5 @@
 import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs';
-import { authRoute } from '@/lib/utils';
+import { authRoute, getPeriod } from '@/lib/utils';
 
 export default authRoute(async (req, res) => {
 	if (req.method === 'POST') {
@@ -13,6 +13,8 @@ export default authRoute(async (req, res) => {
 
 const createMovement = async (req, res) => {
 	const supabase = createServerSupabaseClient({ req, res });
+	const period = getPeriod();
+
 	const {
 		accountId,
 		categoryId,
@@ -26,6 +28,31 @@ const createMovement = async (req, res) => {
 		parentMovementId,
 	} = req.body;
 
+	let monthResult = await supabase
+		.from('months_balance')
+		.select('income,spent')
+		.eq('period', period)
+		.eq('account_id', accountId);
+
+	if (monthResult.error) {
+		res.status(400).json(monthResult.error);
+		return;
+	}
+
+	if (!monthResult.data.length) {
+		monthResult = await supabase
+			.from('months_balance')
+			.insert({ period, income: 0, spent: 0, account_id: accountId })
+			.select();
+
+		if (monthResult.error) {
+			res.status(400).json(monthResult.error);
+			return;
+		}
+	}
+
+	let [{ income: monthIncome, spent: monthSpent }] = monthResult.data;
+
 	const [
 		{ data: account, error: accountError },
 		{ data: category, error: categoryError },
@@ -33,7 +60,7 @@ const createMovement = async (req, res) => {
 		supabase.from('accounts').select('balance').eq('id', accountId).single(),
 		supabase
 			.from('categories')
-			.select('movement_types(id,type)')
+			.select('is_group_item,movement_types(id,type)')
 			.eq('id', categoryId)
 			.single(),
 	]);
@@ -44,7 +71,16 @@ const createMovement = async (req, res) => {
 	}
 
 	const isIncome = category.movement_types.type === 'income';
-	const newBalance = account.balance + (isIncome ? amount : amount * -1);
+	const newAmount = exchangeRate ? exchangeRate * amount : amount;
+	const newBalance = account.balance + (isIncome ? newAmount : newAmount * -1);
+
+	if (!category.is_group_item) {
+		if (isIncome) {
+			monthIncome += newAmount;
+		} else {
+			monthSpent += newAmount;
+		}
+	}
 
 	const rpc = {
 		name: 'create_movement',
@@ -60,6 +96,9 @@ const createMovement = async (req, res) => {
 			categoryid: categoryId,
 			scheduledid: scheduledId || null,
 			parentmovementid: parentMovementId || null,
+			monthincome: monthIncome,
+			monthspent: monthSpent,
+			monthperiod: period,
 		},
 	};
 
@@ -108,21 +147,52 @@ const updateMovement = async (req, res) => {
 
 	const [{ data: account }, { data: movement }] = await Promise.all([
 		supabase.from('accounts').select('balance').eq('id', accountId).single(),
-		supabase.from('movements').select('amount').eq('id', movementId).single(),
+		supabase
+			.from('movements')
+			.select(
+				'amount,exchange_rate,created_at,categories(is_group_item,movement_types(type))',
+			)
+			.eq('id', movementId)
+			.single(),
 	]);
+
+	const period = getPeriod(movement.created_at);
+
+	const { data: monthBalance } = await supabase
+		.from('months_balance')
+		.select('income,spent')
+		.eq('period', period)
+		.eq('account_id', accountId)
+		.single();
+
+	const newAmount = exchangeRate ? exchangeRate * amount : amount;
+	const oldAmount = movement.exchange_rate
+		? movement.exchange_rate * movement.amount
+		: movement.amount;
+
+	if (!category.categories.is_group_item) {
+		if (movement.categories.movement_types.type === 'income') {
+			monthBalance.income = monthBalance.income - oldAmount + newAmount;
+		} else {
+			monthBalance.spent = monthBalance.spent - oldAmount + newAmount;
+		}
+	}
 
 	const rpc = {
 		name: 'update_movement',
 		data: {
 			accountid: accountId,
 			movementid: movementId,
-			newbalance: account.balance - movement.amount + amount,
+			newbalance: account.balance - oldAmount + newAmount,
 			newtitle: title,
 			newdescription: description,
 			newamount: amount,
 			currencyid: currencyId,
 			exchangerate: exchangeRate || 0,
 			categoryid: categoryId,
+			monthincome: monthBalance.income,
+			monthspent: monthBalance.spent,
+			monthperiod: period,
 		},
 	};
 
@@ -145,20 +215,44 @@ const deleteMovement = async (req, res) => {
 		supabase.from('accounts').select('id,balance').eq('id', accountId).single(),
 		supabase
 			.from('movements')
-			.select('id,amount,categories(movement_types(type)),installment_id')
+			.select(
+				'id,amount,exchange_rate,categories(id,is_group_item,movement_types(type)),installment_id,created_at',
+			)
 			.eq('id', movementId)
 			.single(),
 	]);
 
+	const period = getPeriod(movement.created_at);
+
+	const { data: monthBalance } = await supabase
+		.from('months_balance')
+		.select('income,spent')
+		.eq('period', period)
+		.eq('account_id', accountId)
+		.single();
+
 	const isIncome = movement.categories.movement_types.type === 'income';
-	const amount = isIncome ? movement.amount * -1 : movement.amount;
+	const amount = movement.exchange_rate
+		? movement.exchange_rate * movement.amount
+		: movement.amount;
+
+	if (!movement.categories.is_group_item) {
+		if (isIncome) {
+			monthBalance.income -= amount;
+		} else {
+			monthBalance.spent -= amount;
+		}
+	}
 
 	const rpc = {
 		name: 'delete_movement',
 		data: {
 			accountid: account.id,
 			movementid: movement.id,
-			newbalance: account.balance + amount,
+			newbalance: account.balance + (isIncome ? amount * -1 : amount),
+			monthincome: monthBalance.income,
+			monthspent: monthBalance.spent,
+			monthperiod: period,
 		},
 	};
 

@@ -186,7 +186,7 @@ function InstallmentForm({
 												errors.parentMovementId ? 'border-red-600' : ''
 											}
 										>
-											<SelectValue placeholder="Select a currency" />
+											<SelectValue placeholder="Select a payment" />
 										</SelectTrigger>
 										<SelectContent>
 											{movements.map(movement => (

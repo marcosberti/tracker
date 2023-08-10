@@ -4,7 +4,7 @@ import Movements from './movements';
 function getPaidExpenses(movements, expenseIdKey) {
 	return movements.reduce((acc, movement) => {
 		if (movement.subItems?.length) {
-			return [...acc, getPaidExpenses(movement.subItems)];
+			return [...acc, ...getPaidExpenses(movement.subItems, expenseIdKey)];
 		} else if (movement[expenseIdKey]) {
 			acc.push(movement[expenseIdKey]);
 		}

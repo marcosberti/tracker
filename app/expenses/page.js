@@ -1,6 +1,6 @@
 import { createServerClient } from '@/lib/supabase-server';
-import Installments from './components/Installments';
-import Scheduled from './components/Scheduled';
+import Installments from './components/installments';
+import Scheduled from './components/scheduled';
 
 async function getData() {
 	const supabase = createServerClient();
@@ -20,10 +20,10 @@ async function getData() {
 
 export default async function Expenses({
 	searchParams: {
-		showInactiveInstallments,
+		scheduledPage = 1,
 		installmentsPage = 1,
 		showInactiveScheduled,
-		scheduledPage = 1,
+		showInactiveInstallments,
 	},
 }) {
 	const { accounts, categories } = await getData();

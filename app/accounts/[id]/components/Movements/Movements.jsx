@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import List from './list';
 import MovementSheet from './movement-sheet';
 import InstallmentSheet from './installment-sheet';
+import ScheduledSheet from './scheduled-sheet';
 
 const MODALS = {
 	EDIT: 'edit',
@@ -102,6 +103,16 @@ export default function Movements({ data, account, currencies, categories }) {
 					isOpen
 					account={account}
 					installment={state.installment}
+					movements={data}
+					currencies={currencies}
+					onClose={handleClose}
+				/>
+			) : null}
+			{state.modal === MODALS.SCHEDULED ? (
+				<ScheduledSheet
+					isOpen
+					account={account}
+					scheduled={state.scheduled}
 					movements={data}
 					currencies={currencies}
 					onClose={handleClose}

@@ -4,7 +4,7 @@ import Overview from './components/overview';
 import SummarizedCategories from './components/summarized-categories';
 import Movements from './components/movements';
 import { createServerClient } from '@/lib/supabase-server';
-import { getMonthDates, getTotalized } from '@/lib/utils';
+import { getMonthDates } from '@/lib/utils';
 
 function getSummarized(account, movements, initialState = {}) {
 	const summarized = movements.reduce((acc, movement) => {
@@ -37,16 +37,21 @@ async function getAccount(id, month, year) {
 	const { start: dateFrom, end: dateTo } = getMonthDates(year, month);
 
 	const [
+		{ data: monthData },
 		{ data: account },
 		{ data: currencies },
 		{ data: categories },
 		{ data: allMovements },
 	] = await Promise.all([
 		supabase
+			.from('months_balance')
+			.select('income,spent')
+			.eq('account_id', id)
+			.single(),
+		supabase
 			.from('accounts')
 			.select('id,name,balance,currencies(id,code)')
 			.eq('id', id)
-			.limit(1)
 			.single(),
 		supabase
 			.from('currencies')
@@ -59,7 +64,7 @@ async function getAccount(id, month, year) {
 		supabase
 			.from('movements')
 			.select(
-				'id,title,description,amount,exchange_rate,created_at,currencies(id,code),categories(id,name,icon,color,movement_types(type)),installment_id,scheduled_id,parent_movement_id',
+				'id,title,description,amount,exchange_rate,created_at,currencies(id,code),categories(id,name,icon,color,is_group_item,movement_types(type)),installment_id,scheduled_id,parent_movement_id',
 			)
 			.eq('account_id', id)
 			.order('created_at', { ascending: false })
@@ -74,8 +79,8 @@ async function getAccount(id, month, year) {
 		subItems: childMovements.filter(c => c.parent_movement_id === m.id),
 	}));
 
-	const income = getTotalized(account, movements, 'income');
-	const spent = getTotalized(account, movements, 'spent');
+	const income = monthData?.income ?? 0;
+	const spent = monthData?.spent ?? 0;
 	const summarized = getSummarized(account, movements);
 
 	return {

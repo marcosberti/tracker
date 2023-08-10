@@ -2,13 +2,17 @@
 const { COLORS } = require('./lib/utils');
 
 const rules = [
+	'text-color-600',
 	'text-color-700',
-	'bg-color-300/[.4]',
-	'bg-color-200',
-	'bg-color-600',
-	'group-hover:shadow-color-100',
 	'bg-color-50',
 	'bg-color-50/[.5]',
+	'bg-color-100',
+	'bg-color-200',
+	'bg-color-300',
+	'bg-color-300/[.4]',
+	'bg-color-600',
+	'hover:bg-color-400',
+	'group-hover:shadow-color-100',
 ];
 
 const safeList = rules
