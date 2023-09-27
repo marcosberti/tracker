@@ -4,7 +4,7 @@ import Overview from './components/overview';
 import SummarizedCategories from './components/summarized-categories';
 import Movements from './components/movements';
 import { createServerClient } from '@/lib/supabase-server';
-import { getMonthDates } from '@/lib/utils';
+import { getMonthDates, getPeriod } from '@/lib/utils';
 
 function getSummarized(account, movements, initialState = {}) {
 	const summarized = movements.reduce((acc, movement) => {
@@ -35,6 +35,9 @@ function getSummarized(account, movements, initialState = {}) {
 async function getAccount(id, month, year) {
 	const supabase = createServerClient();
 	const { start: dateFrom, end: dateTo } = getMonthDates(year, month);
+	const period = getPeriod(dateFrom);
+
+	console.log('>>>period', dateFrom, period);
 
 	const [
 		{ data: monthData },
@@ -47,6 +50,7 @@ async function getAccount(id, month, year) {
 			.from('months_balance')
 			.select('income,spent')
 			.eq('account_id', id)
+			.eq('period', period)
 			.single(),
 		supabase
 			.from('accounts')

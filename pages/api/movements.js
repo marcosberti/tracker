@@ -21,6 +21,7 @@ const createMovement = async (req, res) => {
 		title,
 		description,
 		amount,
+		date,
 		currencyId,
 		exchangeRate,
 		scheduledId,
@@ -87,7 +88,7 @@ const createMovement = async (req, res) => {
 		data: {
 			accountid: accountId,
 			newbalance: newBalance,
-			latestmovement: new Date().toISOString(),
+			movementdate: date,
 			title: title,
 			description: description,
 			amount: amount,
@@ -141,6 +142,7 @@ const updateMovement = async (req, res) => {
 		title,
 		description,
 		amount,
+		date,
 		currencyId,
 		exchangeRate,
 	} = req.body;
@@ -187,6 +189,7 @@ const updateMovement = async (req, res) => {
 			newtitle: title,
 			newdescription: description,
 			newamount: amount,
+			newdate: date,
 			currencyid: currencyId,
 			exchangerate: exchangeRate || 0,
 			categoryid: categoryId,

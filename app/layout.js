@@ -3,8 +3,8 @@ import { Inter } from 'next/font/google';
 import SupabaseListener from '@/components/providers/supabase-listener';
 import SupabaseProvider from '@/components/providers/supabase-provider';
 import { createServerClient } from '@/lib/supabase-server';
-import Navbar from '@/app/components/navbar';
 import { Toaster } from '@/components/ui/toaster';
+import Navbar from './components/navbar';
 
 const inter = Inter({ subsets: ['latin'] });
 

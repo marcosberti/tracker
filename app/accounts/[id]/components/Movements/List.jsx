@@ -88,7 +88,7 @@ function ItemContent({ isSelected, item, accountCurrency, onSelected }) {
 				{item.description ? <small>{item.description}</small> : null}
 			</div>
 			<p className={`${WIDTHS.PAID_ON} text-start`}>
-				{item.created_at ? formatDate(item.created_at) : '-'}
+				{item.created_at ? formatDate(item.created_at.slice(0, 19)) : '-'}
 			</p>
 			<div className={`flex flex-col ${WIDTHS.AMOUNT} text-end`}>
 				{!amount ? '-' : null}

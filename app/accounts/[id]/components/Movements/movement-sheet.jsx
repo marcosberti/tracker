@@ -30,6 +30,7 @@ function getDefaultValues(account, movement) {
 		accountId: account.id,
 		title: movement?.title,
 		amount: movement?.amount,
+		date: movement?.created_at?.slice(0, 10),
 		description: movement?.description,
 		categoryId: movement?.categories?.id,
 		currencyId: movement?.currencies?.id ?? account.currencies.id,
@@ -171,10 +172,6 @@ function MovementForm({
 										return 'Amount is required';
 									}
 
-									// if (value < 0) {
-									// 	return 'Amount must be greater than 0';
-									// }
-
 									return null;
 								},
 							})}
@@ -219,6 +216,24 @@ function MovementForm({
 						/>
 					</FieldWithError>
 				</div>
+				<FieldWithError error={errors.date?.message}>
+					<Label htmlFor="date">Date</Label>
+					<Input
+						id="date"
+						name="date"
+						type="date"
+						className={errors.date ? 'border-red-600' : ''}
+						{...register('date', {
+							validate: value => {
+								if (!value) {
+									return 'Date is required';
+								}
+
+								return null;
+							},
+						})}
+					/>
+				</FieldWithError>
 				{isExchangeRateRequired ? (
 					<div className="flex items-center gap-2">
 						<FieldWithError
@@ -334,6 +349,8 @@ export default function MovementSheet({
 	const handleSubmit = values => {
 		const mutate = movement ? patchMutate : postMutate;
 		const data = movement ? { ...values, movementId: movement.id } : values;
+		data.date = new Date(data.date).toISOString();
+
 		mutate({
 			data,
 			onSuccess: () => {

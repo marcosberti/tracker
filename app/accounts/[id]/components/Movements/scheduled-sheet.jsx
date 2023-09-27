@@ -129,6 +129,24 @@ function ScheduledForm({
 						</Label>
 					</FieldWithError>
 				</div>
+				<FieldWithError error={errors.date?.message}>
+					<Label htmlFor="date">Date</Label>
+					<Input
+						id="date"
+						name="date"
+						type="date"
+						className={errors.date ? 'border-red-600' : ''}
+						{...register('date', {
+							validate: value => {
+								if (!value) {
+									return 'Date is required';
+								}
+
+								return null;
+							},
+						})}
+					/>
+				</FieldWithError>
 				{isExchangeRateRequired ? (
 					<div className="flex items-center gap-2">
 						<FieldWithError
@@ -240,7 +258,9 @@ export default function ScheduledSheet({
 			scheduledId: scheduled.id,
 			accountId: account.id,
 			...values,
+			date: new Date(values.date).toDateString(),
 		};
+
 		mutate({
 			data,
 			onSuccess: () => {

@@ -24,6 +24,8 @@ async function refreshAccountBalance(req, res) {
 	const [year, month] = period.split('-');
 	const { start, end } = getMonthDates(year, month);
 
+	console.log('>>>', period, start, end);
+
 	const [
 		{ data: account, error: accountError },
 		{ data: monthBalance, error: monthError },
@@ -37,7 +39,9 @@ async function refreshAccountBalance(req, res) {
 			.eq('period', period),
 		supabase
 			.from('movements')
-			.select('amount,exchange_rate,categories(movement_types(type))')
+			.select(
+				'title,amount,exchange_rate,categories(movement_types(type)),parent_movement_id',
+			)
 			.eq('account_id', accountId)
 			.is('parent_movement_id', null)
 			.gte('created_at', start)
@@ -51,7 +55,8 @@ async function refreshAccountBalance(req, res) {
 
 	const income = getSummarized(movements, 'income');
 	const spent = getSummarized(movements, 'spent');
-	const balance = income - spent;
+	const balance =
+		account.balance - monthBalance.income + monthBalance.spent + income - spent;
 
 	const [{ error: accountUpdError }, { error: monthBalanceUpdError }] =
 		await Promise.all([
@@ -68,5 +73,5 @@ async function refreshAccountBalance(req, res) {
 		return;
 	}
 
-	return res.status(200).json({ message: 'Sync successfuly' });
+	return res.status(200).json({ message: 'Sync successfuly', data: movements });
 }

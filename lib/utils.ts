@@ -44,14 +44,13 @@ export async function toDataURL(blob: Blob) {
 
 export function getStartOfMonth(date = new Date()) {
 	const start = new Date(date.getFullYear(), date.getMonth(), 1);
-	start.setUTCHours(0, 0, 0, 0);
 
 	return start.toISOString();
 }
 
 export function getEndOfMonth(date = new Date()) {
 	const end = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-	end.setUTCHours(23, 59, 59, 999);
+	end.setHours(23, 59, 59, 999);
 
 	return end.toISOString();
 }

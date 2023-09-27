@@ -1,6 +1,8 @@
 import { createServerClient } from '@/lib/supabase-server';
 import MonthChart from './month-chart';
 import MonthlyChart from './monthly-chart';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Suspense } from 'react';
 
 const getData = async () => {
 	const supabase = createServerClient();
@@ -56,13 +58,35 @@ const getData = async () => {
 	};
 };
 
-export default async function Charts() {
+async function ChartsContainer() {
 	const { account, accounts, monthData, monthsData } = await getData();
 
 	return (
-		<>
+		<div className="flex grow justify-between">
 			<MonthChart account={account} monthData={monthData} />
 			<MonthlyChart accounts={accounts} monthsData={monthsData} />
+		</div>
+	);
+}
+
+function ChartsLoader() {
+	return (
+		<>
+			<div className="flex basis-1/4 flex-col items-center p-1">
+				<Skeleton className="h-4 w-24" />
+				<Skeleton className="mt-4 h-[250px] w-[250px] rounded-full" />
+			</div>
+			<div className="flex-1">
+				<Skeleton className="h-full w-full" />
+			</div>
 		</>
+	);
+}
+
+export default function Charts() {
+	return (
+		<Suspense fallback={<ChartsLoader />}>
+			<ChartsContainer />
+		</Suspense>
 	);
 }
