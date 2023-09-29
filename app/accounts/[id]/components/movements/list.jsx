@@ -29,14 +29,13 @@ import { Checkbox } from '@/components/ui/checkbox';
 
 const WIDTHS = {
 	CHECK: 'basis-[5%]',
-	ICON: 'basis-[5%]',
-	TITLE: 'basis-[39%]',
+	TITLE: 'basis-[44%]',
 	PAID_ON: 'basis-[29%]',
 	AMOUNT: 'basis-[22%]',
 	ACTIONS: 'basis-[10%]',
 };
 
-function ItemContent({ isSelected, item, accountCurrency, onSelected }) {
+function ItemContent({ shouldGrow, item, accountCurrency }) {
 	const isSameCurrency = item.currencies.id === accountCurrency.id;
 	let amount = !Number.isNaN(item.amount) ? item.amount : null;
 	let expenseType;
@@ -62,33 +61,40 @@ function ItemContent({ isSelected, item, accountCurrency, onSelected }) {
 
 	return (
 		<>
-			<div className={`${WIDTHS.CHECK} flex justify-center`}>
-				<Checkbox
-					checked={isSelected}
-					onCheckedChange={() => onSelected(item)}
-				/>
+			<div
+				className={`${WIDTHS.TITLE} text-xs lg:text-sm text-start ${
+					shouldGrow ? 'grow' : ''
+				}`}
+			>
+				<div className="flex items-center gap-2 ">
+					<Icon
+						icon={item.categories.icon}
+						className={`hidden lg:block text-${item.categories.color}-700`}
+					/>
+					<div>
+						{item.title}{' '}
+						{item.isInstallment ? (
+							<small>
+								({item.paid_installments + 1}/{item.installments})
+							</small>
+						) : null}
+						<div className="flex flex-col gap-2">
+							{expenseType ? (
+								<Badge variant="secondary">{expenseType}</Badge>
+							) : null}
+							{item.isPaymentPending ? (
+								<Badge variant="outline">pending</Badge>
+							) : null}
+						</div>
+						{item.description ? <small>{item.description}</small> : null}
+						<div className="lg:hidden text-start">
+							{item.created_at ? formatDate(item.created_at.slice(0, 19)) : ''}
+						</div>
+					</div>
+				</div>
 			</div>
-			<div className={`${WIDTHS.ICON} flex justify-center`}>
-				<Icon
-					icon={item.categories.icon}
-					className={`text-${item.categories.color}-700`}
-				/>
-			</div>
-			<div className={`${WIDTHS.TITLE} text-start`}>
-				{item.title}{' '}
-				{item.isInstallment ? (
-					<small>
-						({item.paid_installments + 1}/{item.installments})
-					</small>
-				) : null}
-				{expenseType ? <Badge variant="secondary">{expenseType}</Badge> : null}
-				{item.isPaymentPending ? (
-					<Badge variant="outline">pending payment</Badge>
-				) : null}
-				{item.description ? <small>{item.description}</small> : null}
-			</div>
-			<p className={`${WIDTHS.PAID_ON} text-start`}>
-				{item.created_at ? formatDate(item.created_at.slice(0, 19)) : '-'}
+			<p className={`${WIDTHS.PAID_ON} text-start hidden lg:block`}>
+				{item.created_at ? formatDate(item.created_at.slice(0, 19)) : ''}
 			</p>
 			<div className={`flex flex-col ${WIDTHS.AMOUNT} text-end`}>
 				{!amount ? '-' : null}
@@ -171,17 +177,18 @@ function Item({
 }) {
 	return (
 		<>
+			<div className={`${WIDTHS.CHECK} flex justify-center mr-4 lg:m-0`}>
+				<Checkbox
+					checked={isSelected}
+					onCheckedChange={() => onSelected(item)}
+				/>
+			</div>
 			<div
-				className={`flex flex-1 items-center ${
+				className={`flex flex-1 items-center justify-between lg:justify-normal ${
 					item.isPaymentPending ? 'opacity-50' : null
 				}`}
 			>
-				<ItemContent
-					isSelected={isSelected}
-					item={item}
-					accountCurrency={accountCurrency}
-					onSelected={onSelected}
-				/>
+				<ItemContent item={item} accountCurrency={accountCurrency} />
 			</div>
 			<Actions
 				isPending={isPending}
@@ -206,33 +213,34 @@ function AccordionItem({
 }) {
 	return (
 		<Accordion type="single" collapsible className="w-full">
-			<RadixAccordionItem
-				className="flex-1 border-0 "
-				value={`item-${item.id}`}
-			>
-				<AccordionTrigger
-					className="p-0 hover:no-underline"
-					disabled={!item.subItems?.length}
-				>
-					<div className="flex basis-[90%] items-center">
-						<ItemContent
-							isSelected={selected.has(item.id)}
-							item={item}
-							accountCurrency={accountCurrency}
-							onSelected={onSelected}
+			<RadixAccordionItem className="flex-1 border-0" value={`item-${item.id}`}>
+				<div className="flex items-center">
+					<div className={`${WIDTHS.CHECK} flex justify-center mr-4 lg:m-0`}>
+						<Checkbox
+							checked={selected.has(item.id)}
+							onCheckedChange={() => onSelected(item)}
 						/>
 					</div>
-				</AccordionTrigger>
+					<div className="grow">
+						<AccordionTrigger
+							className="p-0 hover:no-underline w-full"
+							disabled={!item.subItems?.length}
+						>
+							<div className="flex basis-[90%] items-center">
+								<ItemContent item={item} accountCurrency={accountCurrency} />
+							</div>
+						</AccordionTrigger>
+					</div>
+					<div />
+				</div>
 				<AccordionContent className="mt-4 bg-gray-100">
-					<div className="rounded-full px-4 pt-4">
+					<div className="rounded-full lg:px-12 pt-2 lg:pt-4">
 						{item.subItems?.map(subItem => (
-							<div key={subItem.id} className="flex items-center py-2">
+							<div key={subItem.id} className="flex items-center px-4 py-2">
 								<ItemContent
-									key={subItem.id}
-									isSelected={selected.has(subItem.id)}
+									shouldGrow
 									item={subItem}
 									accountCurrency={accountCurrency}
-									onSelected={onSelected}
 								/>
 								<Actions
 									isPending={isPending}
@@ -314,25 +322,25 @@ export default function List({
 
 	return (
 		<div className="relative flex flex-col rounded-md border-x-[1px]">
-			<div className="sticky top-0 z-[1] flex justify-between rounded-t-md border-b-[1px] border-t-[1px] bg-white p-4">
+			<div className="hidden lg:flex sticky top-0 z-[1] justify-between items-center rounded-t-md border-b-[1px] border-t-[1px] bg-white p-4">
+				<div className={`${WIDTHS.CHECK} flex justify-center`}>
+					<Checkbox
+						checked={data.length === selected.size}
+						onCheckedChange={handleSelectAll}
+					/>
+				</div>
 				<div className="flex flex-1 items-center font-semibold">
-					<div className={`${WIDTHS.CHECK} flex justify-center`}>
-						<Checkbox
-							checked={data.length === selected.size}
-							onCheckedChange={handleSelectAll}
-						/>
-					</div>
-					<div className={WIDTHS.ICON} />
 					<p className={WIDTHS.TITLE}>Title</p>
 					<p className={WIDTHS.PAID_ON}>Paid on</p>
 					<p className={`${WIDTHS.AMOUNT} text-end`}>Amount</p>
 				</div>
 				<div className={WIDTHS.ACTIONS} />
 			</div>
+			<div className="sticky top-0 z-[1] lg:hidden h-[5px] rounded-t-md border-t-[1px]" />
 			{data.map(item => (
 				<div
 					key={item.id}
-					className="flex items-center border-b-[1px] p-4 last-of-type:rounded-b-md"
+					className="flex items-center  border-b-[1px] p-4 last-of-type:rounded-b-md"
 				>
 					{item.subItems?.length ? (
 						<AccordionItem

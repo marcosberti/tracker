@@ -28,7 +28,7 @@ export default function Item({ account, isPending, onEdit, onDelete }) {
 	const canDelete = account.latest_movement === null;
 
 	return (
-		<div className="group relative w-[250px] cursor-pointer opacity-70 transition-all hover:opacity-100">
+		<div className="group relative w-full lg:w-[250px] cursor-pointer opacity-70 transition-all hover:opacity-100">
 			<Link href={`/accounts/${account.id}`}>
 				<div
 					className={`drop-shadow-2xl" rounded-lg p-4 shadow-lg ${

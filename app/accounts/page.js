@@ -30,7 +30,7 @@ export default async function Accounts() {
 				<h2 className="text-lg font-bold">Accounts</h2>
 				<Actions currencies={currencies} />
 			</div>
-			<div className="bg-pur mt-4 flex flex-wrap gap-4">
+			<div className="bg-pur mt-4 flex flex-col lg:flex-row flex-wrap gap-4">
 				{accounts.map(account => (
 					<Account key={account.id} account={account} currencies={currencies} />
 				))}

@@ -51,7 +51,7 @@ export default function Overview({ account, income, spent }) {
 	};
 
 	return (
-		<div className="flex min-w-[250px] flex-col justify-between gap-2 rounded-lg border-[1px] p-4">
+		<div className="flex min-w-[250px] w-full lg:w-auto flex-col justify-between gap-2 rounded-lg border-[1px] p-4">
 			<div className="flex items-center justify-between">
 				<div className="flex gap-2">
 					<span className="font-semibold">Overview</span>

@@ -4,7 +4,7 @@ export default function Home() {
 	return (
 		<div className="flex flex-col">
 			<Charts />
-			<div className="basis-[40%]">mov</div>
+			<div className="hidden lg:block basis-[40%]">mov</div>
 		</div>
 	);
 }

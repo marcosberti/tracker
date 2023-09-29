@@ -29,7 +29,7 @@ export default function MonthChart({ account, monthData }) {
 	const hasMovements = monthData.income && monthData.spent;
 
 	return (
-		<div className="flex min-w-[300px] basis-1/4 flex-col items-center">
+		<div className="flex max-w-[150px] lg:min-w-[300px] lg:basis-1/4 flex-col items-center">
 			<p className="text-lg font-bold">Balance</p>
 			{hasMovements ? (
 				<Doughnut data={chartData} />

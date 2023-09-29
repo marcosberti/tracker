@@ -62,7 +62,7 @@ async function ChartsContainer() {
 	const { account, accounts, monthData, monthsData } = await getData();
 
 	return (
-		<div className="flex grow justify-between">
+		<div className="flex flex-col lg:flex-row grow justify-between items-center">
 			<MonthChart account={account} monthData={monthData} />
 			<MonthlyChart accounts={accounts} monthsData={monthsData} />
 		</div>

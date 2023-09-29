@@ -77,7 +77,7 @@ export default function Movements({ data, account, currencies, categories }) {
 
 	return (
 		<>
-			<div className="h-[calc(100vh-288px-4rem)] overflow-y-auto">
+			<div className="h-[calc(100vh-288px-6rem)] lg:h-[calc(100vh-288px-4rem)] overflow-y-auto overflow-x-hidden">
 				<List
 					isPending={isPending}
 					data={data}

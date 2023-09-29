@@ -26,9 +26,13 @@ export default async function RootLayout({ children }) {
 			>
 				<SupabaseProvider session={session}>
 					<SupabaseListener serverAccessToken={session?.access_token} />
-					<div className="flex h-full">
+					<div className="flex h-full flex-col lg:flex-row overflow-hidden relative">
 						{session ? <Navbar /> : null}
-						<main className={`w-full ${session ? 'p-8' : ''} overflow-y-auto`}>
+						<main
+							className={`w-full h-full ${
+								session ? 'p-4 lg:p-8' : ''
+							} overflow-y-auto`}
+						>
 							{children}
 						</main>
 					</div>

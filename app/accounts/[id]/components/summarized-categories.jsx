@@ -4,7 +4,7 @@ import { formatCurrency } from '@/lib/utils';
 export default function SummarizedCategories({ account, summarized }) {
 	return (
 		<div
-			className="overflow-x-auto"
+			className="hidden lg:block overflow-x-auto"
 			style={{ maxWidth: 'calc(100vw - 80px - 250px - 2rem - 2rem - 2rem)' }}
 		>
 			<div className="flex w-full gap-2 ">

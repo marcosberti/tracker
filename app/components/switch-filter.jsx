@@ -28,7 +28,7 @@ export default function SwitchFilter({ label, paramKey }) {
 
 	return (
 		<div className="flex items-center space-x-2">
-			<Label>{label}</Label>
+			<Label className="text-end">{label}</Label>
 			<Switch checked={checked} onCheckedChange={handleChange} />
 		</div>
 	);

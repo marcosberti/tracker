@@ -397,7 +397,7 @@ export default function MovementSheet({
 
 	return (
 		<Sheet open={isOpen} onOpenChange={handleClose}>
-			<SheetContent>
+			<SheetContent size="content">
 				<SheetHeader>
 					<SheetTitle>
 						what are you paying?{' '}

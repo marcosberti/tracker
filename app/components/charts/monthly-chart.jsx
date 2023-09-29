@@ -122,7 +122,7 @@ export default function MonthlyChart({ accounts, monthsData }) {
 	};
 
 	return (
-		<div className="flex-1 p-4 max-w-[65vw]">
+		<div className="flex-1 p-4 hidden lg:block max-w-[65vw]">
 			<div className="mb-4 flex gap-2">
 				{accounts.map(account => (
 					<AccountButton
