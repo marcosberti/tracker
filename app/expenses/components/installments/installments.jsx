@@ -2,12 +2,12 @@
 import { Check, Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SwitchFilter from '@/app/components/switch-filter';
-import List from './list';
 import { useState } from 'react';
-import Sheet from './sheet';
 import useMutation from '@/hooks/useMutation';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/ui/use-toast';
+import Sheet from './sheet';
+import List from './list';
 
 export default function Installments({
 	accounts,
