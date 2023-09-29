@@ -37,8 +37,6 @@ async function getAccount(id, month, year) {
 	const { start: dateFrom, end: dateTo } = getMonthDates(year, month);
 	const period = getPeriod(dateFrom);
 
-	console.log('>>>period', dateFrom, period);
-
 	const [
 		{ data: monthData },
 		{ data: account },
@@ -111,7 +109,8 @@ export default async function Account({
 		spent,
 		summarized,
 	} = await getAccount(id, month, year);
-	const isInCurrentMonth = !month;
+	const currentMonth = new Date().getMonth();
+	const isInCurrentMonth = !month || +month === currentMonth;
 
 	return (
 		<div className="flex flex-col gap-4">

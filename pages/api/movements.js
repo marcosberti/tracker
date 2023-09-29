@@ -61,7 +61,7 @@ const createMovement = async (req, res) => {
 		supabase.from('accounts').select('balance').eq('id', accountId).single(),
 		supabase
 			.from('categories')
-			.select('is_group_item,movement_types(id,type)')
+			.select('movement_types(type)')
 			.eq('id', categoryId)
 			.single(),
 	]);
@@ -71,16 +71,19 @@ const createMovement = async (req, res) => {
 		return;
 	}
 
-	const isIncome = category.movement_types.type === 'income';
-	const newAmount = exchangeRate ? exchangeRate * amount : amount;
-	const newBalance = account.balance + (isIncome ? newAmount : newAmount * -1);
+	let newBalance = account.balance;
 
-	if (!category.is_group_item) {
+	if (!parentMovementId) {
+		const isIncome = category.movement_types.type === 'income';
+		const newAmount = exchangeRate ? exchangeRate * amount : amount;
+
 		if (isIncome) {
 			monthIncome += newAmount;
 		} else {
 			monthSpent += newAmount;
 		}
+
+		newBalance = account.balance + (isIncome ? newAmount : newAmount * -1);
 	}
 
 	const rpc = {
@@ -152,7 +155,7 @@ const updateMovement = async (req, res) => {
 		supabase
 			.from('movements')
 			.select(
-				'amount,exchange_rate,created_at,categories(is_group_item,movement_types(type))',
+				'amount,exchange_rate,created_at,categories(movement_types(type)),parent_movement_id',
 			)
 			.eq('id', movementId)
 			.single(),
@@ -167,17 +170,21 @@ const updateMovement = async (req, res) => {
 		.eq('account_id', accountId)
 		.single();
 
-	const newAmount = exchangeRate ? exchangeRate * amount : amount;
-	const oldAmount = movement.exchange_rate
-		? movement.exchange_rate * movement.amount
-		: movement.amount;
+	let newBalance = account.balance;
 
-	if (!category.categories.is_group_item) {
+	if (!movement.parent_movement_id) {
+		const newAmount = exchangeRate ? exchangeRate * amount : amount;
+		const oldAmount = movement.exchange_rate
+			? movement.exchange_rate * movement.amount
+			: movement.amount;
+
 		if (movement.categories.movement_types.type === 'income') {
 			monthBalance.income = monthBalance.income - oldAmount + newAmount;
 		} else {
 			monthBalance.spent = monthBalance.spent - oldAmount + newAmount;
 		}
+
+		newBalance = account.balance - oldAmount + newAmount;
 	}
 
 	const rpc = {
@@ -185,7 +192,7 @@ const updateMovement = async (req, res) => {
 		data: {
 			accountid: accountId,
 			movementid: movementId,
-			newbalance: account.balance - oldAmount + newAmount,
+			newbalance: newBalance,
 			newtitle: title,
 			newdescription: description,
 			newamount: amount,
@@ -219,7 +226,7 @@ const deleteMovement = async (req, res) => {
 		supabase
 			.from('movements')
 			.select(
-				'id,amount,exchange_rate,categories(id,is_group_item,movement_types(type)),installment_id,created_at',
+				'id,amount,exchange_rate,categories(movement_types(type)),installment_id,created_at,parent_movement_id',
 			)
 			.eq('id', movementId)
 			.single(),
@@ -234,17 +241,21 @@ const deleteMovement = async (req, res) => {
 		.eq('account_id', accountId)
 		.single();
 
-	const isIncome = movement.categories.movement_types.type === 'income';
-	const amount = movement.exchange_rate
-		? movement.exchange_rate * movement.amount
-		: movement.amount;
+	let newBalance = account.balance;
 
-	if (!movement.categories.is_group_item) {
+	if (!movement.parent_movement_id) {
+		const isIncome = movement.categories.movement_types.type === 'income';
+		const amount = movement.exchange_rate
+			? movement.exchange_rate * movement.amount
+			: movement.amount;
+
 		if (isIncome) {
 			monthBalance.income -= amount;
 		} else {
 			monthBalance.spent -= amount;
 		}
+
+		newBalance = account.balance + (isIncome ? amount * -1 : amount);
 	}
 
 	const rpc = {
@@ -252,7 +263,7 @@ const deleteMovement = async (req, res) => {
 		data: {
 			accountid: account.id,
 			movementid: movement.id,
-			newbalance: account.balance + (isIncome ? amount * -1 : amount),
+			newbalance: newBalance,
 			monthincome: monthBalance.income,
 			monthspent: monthBalance.spent,
 			monthperiod: period,

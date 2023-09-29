@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/components/ui/use-toast';
 import { Check, X, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -292,14 +293,16 @@ function MovementForm({
 										<SelectValue placeholder="Select a parent element" />
 									</SelectTrigger>
 									<SelectContent>
-										<SelectItem value={null}>
-											Select a parent element
-										</SelectItem>
-										{movements.map(movement => (
-											<SelectItem key={movement.id} value={movement.id}>
-												{movement.title}
+										<ScrollArea className="h-[200px]">
+											<SelectItem value={null}>
+												Select a parent element
 											</SelectItem>
-										))}
+											{movements.map(movement => (
+												<SelectItem key={movement.id} value={movement.id}>
+													{movement.title}
+												</SelectItem>
+											))}
+										</ScrollArea>
 									</SelectContent>
 								</Select>
 							)}
@@ -380,11 +383,14 @@ export default function MovementSheet({
 		});
 	};
 
-	let posibleParentMovements = movements.filter(
-		m => !m.isPaymentPending && !m.parent_movement_id,
-	);
+	let possibleParentMovements = movements
+		.filter(m => !m.isPaymentPending && !m.parent_movement_id)
+		.sort((a, b) => {
+			return a.title.toLowerCase() > b.title.toLowerCase() ? 1 : -1;
+		});
+
 	if (movement) {
-		posibleParentMovements = posibleParentMovements.filter(
+		possibleParentMovements = possibleParentMovements.filter(
 			m => m.id !== movement.id,
 		);
 	}
@@ -404,7 +410,7 @@ export default function MovementSheet({
 					isPending={isPending}
 					account={account}
 					movement={movement}
-					movements={posibleParentMovements}
+					movements={possibleParentMovements}
 					currencies={currencies}
 					categories={categories}
 					onSubmit={handleSubmit}

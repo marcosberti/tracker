@@ -25,6 +25,7 @@ import { Check, Loader2, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/ui/use-toast';
 import useMutation from '@/hooks/useMutation';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 function getDefaultValues(installment) {
 	return {
@@ -207,11 +208,13 @@ function InstallmentForm({
 											<SelectValue placeholder="Select a payment" />
 										</SelectTrigger>
 										<SelectContent>
-											{movements.map(movement => (
-												<SelectItem key={movement.id} value={movement.id}>
-													{movement.title}
-												</SelectItem>
-											))}
+											<ScrollArea className="h-[200px]">
+												{movements.map(movement => (
+													<SelectItem key={movement.id} value={movement.id}>
+														{movement.title}
+													</SelectItem>
+												))}
+											</ScrollArea>
 										</SelectContent>
 									</Select>
 								)}
@@ -290,7 +293,11 @@ export default function InstallmentSheet({
 		});
 	};
 
-	const parentMovements = movements.filter(m => !m.isPaymentPending);
+	const parentMovements = movements
+		.filter(m => !m.isPaymentPending)
+		.sort((a, b) => {
+			return a.title.toLowerCase() > b.title.toLowerCase() ? 1 : -1;
+		});
 
 	return (
 		<Sheet open={isOpen} onOpenChange={handleClose}>

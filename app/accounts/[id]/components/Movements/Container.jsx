@@ -1,5 +1,6 @@
 import { createServerClient } from '@/lib/supabase-server';
 import Movements from './movements';
+import { Suspense } from 'react';
 
 function getPaidExpenses(movements, expenseIdKey) {
 	return movements.reduce((acc, movement) => {
@@ -78,11 +79,17 @@ export default async function Container({
 	});
 
 	return (
-		<Movements
-			data={allMovements}
-			account={account}
-			currencies={currencies}
-			categories={categories}
-		/>
+		<Suspense fallback={<Loader />}>
+			<Movements
+				data={allMovements}
+				account={account}
+				currencies={currencies}
+				categories={categories}
+			/>
+		</Suspense>
 	);
+}
+
+function Loader() {
+	return <div>loading</div>;
 }
